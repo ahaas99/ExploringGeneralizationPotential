@@ -21,7 +21,7 @@ from typing_extensions import deprecated
 from torch import Tensor
 from torch.nn import _reduction as _Reduction, functional as F
 
-
+#Custom Loss if you want to weight the loss depending on the dataset
 class CustomBCEWithLogitsLoss(nn.Module):
     def __init__(self):
         super(CustomBCEWithLogitsLoss, self).__init__()
@@ -33,7 +33,7 @@ class CustomBCEWithLogitsLoss(nn.Module):
         )
 
 
-
+#Custom Loss if you want to weight the loss depending on the dataset
 class CustomCrossEntropyLoss(nn.Module):
     def __init__(self):
         super(CustomCrossEntropyLoss, self).__init__()
@@ -398,33 +398,20 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             dfalle=df.copy()
         else:
             dfalle = pd.concat([dfalle, df])
+        
+        #safe the metrics for training and validation
         dfalle.to_csv("accuracies" + config["architecture_name"]+ "_" + str(config["img_size"]) + ".csv", index=False)
-        # AUC = get_AUC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Bal_Acc = get_Balanced_ACC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Co = get_Cohen(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Prec = get_Precision(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Print the loss values and send them to wandb
-        #train_loss /= sum_loader_length_train
-        #val_loss /= sum_loader_length_val
 
 
         print(f"\t\t\tTrain Loss: {train_loss}")
         print(f"\t\t\tVal Loss: {val_loss}")
         print(f"\t\t\tACC: {ACC}")
-
+        #strore the parameters in wandb
         wandb.log(
             {"accuracy": ACC, "accuracytrainpartitioned": Acc_TrainPartitioned,
              "accuracypartitioned": Acc_ValPartitioned, "accuracy_train": ACC_Train, "val_loss": val_loss,
              "train_loss": train_loss})
-        # Store the current best model
-        #if val_loss < best_loss:
-        #    best_loss = val_loss
-        #    best_epoch = epoch
-        #    best_model = deepcopy(model)
-        #    head_dict_best = head_dict.copy()
-        #    epochs_no_improve = 0  # Reset the counter
-       # else:
-        #    epochs_no_improve += 1  # Increment the counter
+
         if best_loss > val_loss:
             best_loss = val_loss
             best_epoch = epoch
@@ -445,6 +432,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
         end_time_epoch = time.time()
         hours_epoch, minutes_epoch, seconds_epoch = calculate_passed_time(start_time_epoch, end_time_epoch)
         print("\t\t\tElapsed time for epoch: {:0>2}:{:0>2}:{:05.2f}".format(hours_epoch, minutes_epoch, seconds_epoch))
+    #safe the heads and the backbones, the backbone gets saved with a newly initialized head 
     classifier = torch.nn.Linear(in_features=num_features, out_features=1000, device=config["device"])
     save_name = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     model.head = classifier
