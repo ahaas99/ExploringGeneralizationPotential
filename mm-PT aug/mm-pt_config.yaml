@@ -15,7 +15,7 @@ batch_size: 64  # Batch size for the training.
 batch_size_eval: 256  # Batch size for the evaluation.
 device: 'cuda:1'  # Which device to run the computations on.
 num_workers: 4
-medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the vorrupted dataset is stored
+medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the corrupted dataset is stored
 
 # Modifiable Parameters
 architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
