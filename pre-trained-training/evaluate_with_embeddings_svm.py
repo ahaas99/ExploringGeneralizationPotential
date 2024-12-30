@@ -208,9 +208,9 @@ if __name__ == '__main__':
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
-    parser.add_argument("--output_path", required=False, type=str, default='/mnt/data/embeddingsalex/embeddings/uni/',
+    parser.add_argument("--output_path_embeddings", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--output_path_acc", required=False, type=str, default='accuracies/uni/svm/',
+    parser.add_argument("--output_path_acc", required=False, type=str,
                         help="Path to the output folder.")
     args = parser.parse_args()
     config_file = args.config_file
@@ -239,7 +239,7 @@ if __name__ == '__main__':
         config['seed'] = args.seed
 
     if args.seed:
-        config['output_path'] = args.output_path
+        config['output_path_embeddings'] = args.output_path_embeddings
 
     if args.seed:
         config['output_path_acc'] = args.output_path_acc
@@ -278,20 +278,17 @@ if __name__ == '__main__':
         for img_size in [28, 64, 128, 224]:
             print(f"\t\t... for size {img_size}...")
             if img_size == 28:
-                filename = Path(args.output_path) / f"{dataset}_embeddings.npz"
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_embeddings.npz"
             else:
-                filename = Path(args.output_path) / f"{dataset}_{img_size}_embeddings.npz"
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
 
             data = np.load(filename, allow_pickle=True)
-        # data["arr_0"].item()["train"]["embeddings"]
+
             data_train = data["arr_0"].item()["train"]
             data_validation = data["arr_0"].item()["val"]
             data_test = data["arr_0"].item()["test"]
             config["dataset"]= dataset
             config["img_size"]= img_size
-        # train_loader = DataLoader(data_train, batch_size=config['batch_size'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-        # test_loader = DataLoader(data_test, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-        # print(test_loader)
 
             acc_train, acc_val, acc, bal_acc_train, bal_acc_val, bal_acc, auc_train, auc_val, auc, co_train, co_val, co = evaluate_with_embeddings_svm(
             config, data_train, data_validation, data_test,
@@ -305,7 +302,7 @@ if __name__ == '__main__':
             df = pd.concat([df, dfsupport])
 
 
-            filename = Path(args.output_path_acc) / f"{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
             print(f"= {acc} ")
