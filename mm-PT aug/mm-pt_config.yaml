@@ -7,7 +7,7 @@
 # Fixed Parameters
 data_path: '/mnt/data/'  # Where the dataset is stored
 output_path: '/mnt/data/modelsalex/models/multiheadaugmented/'  # Where the trained model shall be stored.
-output_path_acc:'accuracies/prov' #Where the metrics are stored
+output_path_acc: 'accuracies/prov' #Where the metrics are stored
 epochs: 100  # How many epochs to train for.
 learning_rate: 0.0001  # Learning rate
 MAX_GPU_BATCH_SIZE: 32 # Maximum Batch size for the training on the GPU at the same time.
