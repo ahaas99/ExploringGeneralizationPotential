@@ -144,9 +144,9 @@ if __name__ == '__main__':
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
-    parser.add_argument("--output_path", required=False, type=str, default='embeddings/dino/',
+    parser.add_argument("--output_path_embeddings", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--output_path_acc", required=False, type=str, default='accuracies/dino/gbm/',
+    parser.add_argument("--output_path_acc", required=False, type=str,
                         help="Path to the output folder.")
     args = parser.parse_args()
     config_file = args.config_file
@@ -175,7 +175,7 @@ if __name__ == '__main__':
         config['seed'] = args.seed
 
     if args.seed:
-        config['output_path'] = args.output_path
+        config['output_path_embeddings'] = args.output_path_embeddings
 
     if args.seed:
         config['output_path_acc'] = args.output_path_acc
@@ -211,9 +211,9 @@ if __name__ == '__main__':
         for img_size in [28, 64, 128, 224]:
             print(f"\t\t... for size {img_size}...")
             if img_size == 28:
-                filename = Path(args.output_path) / f"{dataset}_embeddings.npz"
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_embeddings.npz"
             else:
-                filename = Path(args.output_path) / f"{dataset}_{img_size}_embeddings.npz"
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
 
             data = np.load(filename, allow_pickle=True)
             # data["arr_0"].item()["train"]["embeddings"]
@@ -236,7 +236,7 @@ if __name__ == '__main__':
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
-            filename = Path(args.output_path_acc) / f"{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
             print(f"= {acc} ")
