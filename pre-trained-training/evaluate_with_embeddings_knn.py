@@ -226,11 +226,11 @@ if __name__ == '__main__':
            # print(test_loader)
             acc = 0
             anzahlk = 5
-            for k in [11]:
-                acc, bal_acc, co = evaluate_with_embeddings(config, data_train, data_test, k, dataset)
-                d = {'dataset': [dataset], 'img_size': img_size, "Acc":[acc], "Bal_Acc": bal_acc, "Co":co}
-                dfsupport = pd.DataFrame(data=d)
-                df = pd.concat([df, dfsupport])
+            k = 11
+            acc, bal_acc, co = evaluate_with_embeddings(config, data_train, data_test, k, dataset)
+            d = {'dataset': [dataset], 'img_size': img_size, "Acc":[acc], "Bal_Acc": bal_acc, "Co":co}
+            dfsupport = pd.DataFrame(data=d)
+            df = pd.concat([df, dfsupport])
 
             filename = Path(args.output_path_acc) / f"{dataset}_acc.csv"
 
