@@ -187,7 +187,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
 
             # Swap Head for the Mode
             model.head = head_dict[random_dataset]
-
+            #Go through the whole batch by doing gradient_accumulation
             for x in range(gradient_accumulation_steps):
                 imagesx = images[config["MAX_GPU_BATCH_SIZE"] * x:config["MAX_GPU_BATCH_SIZE"] + config[
                     "MAX_GPU_BATCH_SIZE"] * x]
@@ -237,6 +237,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
             Acc_TrainPartitioned = Acc_TrainPartitioned + Acc
         Acc_TrainPartitioned = Acc_TrainPartitioned / 12
         df = pd.DataFrame()
+        #calculate the metrics for train and safe as csv
         for dataset_name in dataset_names:
             Acc = get_ACC(y_true_train_dict[dataset_name].cpu().numpy(), y_pred_train_dict[dataset_name].cpu().numpy(), task_dict[dataset_name])
             column1 = "Acc_" + str(dataset_name)+ "_Train"
@@ -330,7 +331,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
                     get_ACC(labels.cpu().numpy(),
                             outputs.cpu().numpy(), task_dict[dataset_name]))
 
-        # Calculate the metrics
+        # Calculate the metrics for validation and safe as csv
         ACC = np.mean(val_acc_list)
         Acc_ValPartitioned = 0
         for dataset_name in dataset_names:
@@ -366,13 +367,6 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
         else:
             dfalle = pd.concat([dfalle, df])
         dfalle.to_csv("accuracies_" + config["architecture_name"] + str(config["img_size"]) + ".csv", index=False)
-        # AUC = get_AUC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Bal_Acc = get_Balanced_ACC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Co = get_Cohen(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Prec = get_Precision(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-        # Print the loss values and send them to wandb
-        #train_loss /= sum_loader_length_train
-        #val_loss /= sum_loader_length_val
 
 
         print(f"\t\t\tTrain Loss: {train_loss}")
@@ -385,14 +379,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
             {"accuracy": ACC,"accuracytrainpartitioned": Acc_TrainPartitioned,"accuracypartitioned": Acc_ValPartitioned, "accuracy_train": ACC_Train, "val_loss": val_loss,
              "train_loss": train_loss})
         # Store the current best model
-        #if val_loss < best_loss:
-        #    best_loss = val_loss
-        #    best_epoch = epoch
-        #    best_model = deepcopy(model)
-        #    head_dict_best = head_dict.copy()
-        #    epochs_no_improve = 0  # Reset the counter
-       # else:
-        #    epochs_no_improve += 1  # Increment the counter
+
         if val_loss < best_loss:
             best_loss = val_loss
             best_epoch = epoch
@@ -413,6 +400,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
         end_time_epoch = time.time()
         hours_epoch, minutes_epoch, seconds_epoch = calculate_passed_time(start_time_epoch, end_time_epoch)
         print("\t\t\tElapsed time for epoch: {:0>2}:{:0>2}:{:05.2f}".format(hours_epoch, minutes_epoch, seconds_epoch))
+    #save the models, the backbone gets saved without a proper head
     classifier = torch.nn.Linear(in_features=num_features, out_features=1000, device=config["device"])
     model.head = classifier
     best_model.head = classifier
