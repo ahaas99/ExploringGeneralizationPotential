@@ -146,11 +146,9 @@ if __name__ == '__main__':
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
-    parser.add_argument("--output_path", required=False, type=str, default='/mnt/data/modelsalex/models/multihead_neu',
+    parser.add_argument("--output_path", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--embeddings_path", required=False, type=str, default='embeddings/',
-                        help="Path to the output folder.")
-    parser.add_argument("--output_path_acc", required=False, type=str, default='accuracies/',
+    parser.add_argument("--output_path_acc", required=False, type=str,
                         help="Path to the output folder.")
     args = parser.parse_args()
     config_file = args.config_file
@@ -177,11 +175,13 @@ if __name__ == '__main__':
 
     if args.seed:
         config['seed'] = args.seed
+    
     if args.output_path:
         config['output_path'] = args.output_path
+    
+    if args.output_path_acc:
+        config['output_path'] = args.output_path_acc
 
-    if args.embeddings_path:
-        config['embeddings_path'] = args.embeddings_path
 
     # Seed the training and data loading so both become deterministic
     if config['architecture'] == 'alexnet':
@@ -222,31 +222,31 @@ if __name__ == '__main__':
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
             # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
-            architecture = config["architecture"]
-            print(f"\t\t\t ... for {architecture}...")
+            config["architecture"]
+            print(f"\t\t\t ... for {config["architecture"]}...")
             access_token = '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'
             # Create the model
-            if architecture == 'alexnet':
+            if config["architecture"] == 'alexnet':
                 model = alexnet(weights=AlexNet_Weights.DEFAULT)
                 model.classifier[6] = nn.Linear(4096, config['num_classes'])
                 #model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])  # Remove the classifier
-            elif architecture == 'hf-hub:MahmoodLab/uni':
+            elif config["architecture"] == 'hf-hub:MahmoodLab/uni':
                 login(access_token)
                 model = timm.create_model("hf-hub:MahmoodLab/uni", pretrained=True, init_values=1e-5,
                                           dynamic_img_size=True, num_classes=num_classes)
-            elif architecture == 'hf_hub:prov-gigapath/prov-gigapath':
+            elif config["architecture"] == 'hf_hub:prov-gigapath/prov-gigapath':
                 login(access_token)
                 model = timm.create_model("hf_hub:prov-gigapath/prov-gigapath", pretrained=True,
                                           num_classes=num_classes)
             else:
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
-            if architecture == 'alexnet':
+            if config["architecture"] == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
                 mean, std = model.default_cfg['mean'], model.default_cfg['std']
 
-            if architecture == 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m':
+            if config["architecture"] == 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m':
                 total_padding = max(0, 518 - img_size)
             else :
                 total_padding = max(0, 224 - img_size)
@@ -267,6 +267,8 @@ if __name__ == '__main__':
             config["dataset"] = dataset
             config["img_size"] = img_size
             config["architecture"] = architecture
+            
+            #evaluate the mdoels and safe the metrics
             acc,  bal_acc,  auc, co, prec = evaluate(config,dataset=dataset,test_loader=test_loader)
             d = {'dataset': [dataset], 'img_size': img_size, "Acc_Test": [acc], "Bal_Acc": [bal_acc],  "AUC": [auc],
                  "CO": [co],"Prec": [prec] }
@@ -274,8 +276,6 @@ if __name__ == '__main__':
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
             #safe the test metrics to csv
-            filename = Path(args.output_path_acc) / f"{config["architecture_name"]}/head/{img_size}/{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{config["architecture_name"]}/head/{img_size}/{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
