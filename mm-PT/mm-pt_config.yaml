@@ -7,8 +7,7 @@
 # Fixed Parameters
 data_path: '/mnt/data/'  # Where the dataset is stored
 output_path: '/mnt/data/modelsalex/models/multihead_neu/'  # Where the trained model shall be stored.
-output_path_embeddings: '/mnt/data/embeddings/resnet18'  # Where embeddings are stored
-output_path_accuracies: '/mnt/data/accuracies/resnet18'  # Where the accuracies are stored
+output_path_acc: 'accuracies/prov'  # Where the accuracies are stored
 epochs: 100  # How many epochs to train for.
 learning_rate: 0.0001  # Learning rate
 MAX_GPU_BATCH_SIZE: 32 # Maximum Batch size for the training on the GPU at the same time.
@@ -16,7 +15,7 @@ batch_size: 64  # Batch size for the training.
 batch_size_eval: 256  # Batch size for the evaluation.
 device: 'cuda:1'  # Which device to run the computations on.
 num_workers: 4
-medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the vorrupted dataset is stored
+medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the corrupted dataset is stored
 
 # Modifiable Parameters
 architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
