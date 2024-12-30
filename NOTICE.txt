@@ -1,2 +1,3 @@
 Copyright 2024, Sebastian Doerrich
+Copyright 2024, Francseco di Salvo 
 Copyright 2025, Alexander Haas
