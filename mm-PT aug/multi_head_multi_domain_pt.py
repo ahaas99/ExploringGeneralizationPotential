@@ -116,12 +116,13 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
     print("\tCreate the optimizer")
     optimizer = AdamW(model.parameters(), lr=learning_rate)
 
-    # Get lengths of training dataloaders
+# Get lengths of training dataloaders
     loader_len_train = {}  # holds the lengths of the dataloader for each dataset
     sum_loader_length_train = 0  # holds total length of all the dataloaders in a given split combined
     for dataset_name, train_loader in loader_dict['train_loader_dict'].items():
-        loader_len_train[dataset_name] = len(train_loader)
-        sum_loader_length_train += len(train_loader)
+        #cap the length of the dataloader to the instances of breastmnist, which has the least data
+        loader_len_train[dataset_name] = len(loader_dict['train_loader_dict']["breastmnist"])
+        sum_loader_length_train += len(loader_dict['train_loader_dict']["breastmnist"])
     loader_len_val = {}  # holds the lengths of the dataloader for each dataset
     sum_loader_length_val = 0  # holds total length of all the dataloaders in a given split combined
     for dataset_name, validation_loader in loader_dict['val_loader_dict'].items():
@@ -134,6 +135,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
     probability_dict_val = {}
     for dataset_name in dataset_names:
         probability_dict_val[dataset_name] = loader_len_val[dataset_name] / sum_loader_length_val
+
 
     # Create variables to store the best performing model
     print("\tInitialize helper variables ...")
@@ -170,9 +172,6 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
         print(f"\t\t\t Train:")
         model.train()
         train_loss = 0
-        # y_true_train, y_pred_train = torch.tensor([]).to(device), torch.tensor([]).to(device)
-        # y_true_train_multi_label, y_pred_train_multi_label = torch.empty((1, 14)).to(device), torch.empty((1, 14)).to(
-        #    device)
 
         running_loader_length_sum = sum_loader_length_train
         y_true_train_dict, y_pred_train_dict = {}, {}
@@ -280,18 +279,14 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
                            task_dict[dataset_name])
             column5 = "Prec_" + str(dataset_name) + "_Train"
             d = {column1: [Acc], column2: [Auc], column3:[Bal_Acc], column4:[Co], column5: [Prec]}
+            
+            #store the metrics in df, gets saved later
             df1 = pd.DataFrame(data= d)
             if df.empty:
                 df = df1.copy()
             else:
                 df = df.join(df1)
 
-
-
-        # AUC_Train = get_AUC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Bal_Acc_Train = get_Balanced_ACC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Co_Train = get_Cohen(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Prec_Train = get_Precision(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
 
         # Update the learning rate
         scheduler.step(epoch=epoch)
@@ -337,16 +332,22 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
                     # Run the forward pass
                     if task_dict[dataset_name] == 'multi-label, binary-class':
                         labels = labels.to(torch.float32).to(device)
-                        #loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
-                        loss = criterion(outputs, labels)
+                        #weight the loss of the validation to make sure every dataset cobtributes equally to the validation loss
+                        loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        #loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
 
                     else:
                         labels = torch.squeeze(labels, 1).long().to(device)
-                        #loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
-                        loss = criterion(outputs, labels)
+                        #weight the loss of the validation to make sure every dataset cobtributes equally to the validation loss
+                        loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        #loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
                         labels = labels.float().resize_(len(labels), 1)
+
+                    # Store the current loss
+                    val_loss += loss.item()
+
 
                     # Store the current loss
                     val_loss += loss.item()
@@ -406,7 +407,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
         print(f"\t\t\tTrain Loss: {train_loss}")
         print(f"\t\t\tVal Loss: {val_loss}")
         print(f"\t\t\tACC: {ACC}")
-        #strore the parameters in wandb
+        #store the parameters in wandb
         wandb.log(
             {"accuracy": ACC, "accuracytrainpartitioned": Acc_TrainPartitioned,
              "accuracypartitioned": Acc_ValPartitioned, "accuracy_train": ACC_Train, "val_loss": val_loss,
