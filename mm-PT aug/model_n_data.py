@@ -1,4 +1,4 @@
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 import medmnist
 from medmnist import INFO
 import torchvision.transforms as transforms
@@ -55,14 +55,74 @@ def model_n_data(config: dict, gen):
         transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                        padding_mode='constant')  # Zero-Pad the image to 224x224
     ])
+    #horizontal_flip
+    data_transform_aug_1 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),# Zero-Pad the image to 224x224
+        transforms.RandomHorizontalFlip(p=1)
+    ])
+    #horizontal_flip and rotation 90 degrees
+    data_transform_aug_2 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomHorizontalFlip(p=1),
+        transforms.RandomRotation((90,90))
+    ])
+    #vertical_flip
+    data_transform_aug_3 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomVerticalFlip(p=1)
+    ])
+
+    #horizontal_flip and rotation 90 degrees
+    data_transform_aug_4 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomVerticalFlip(p=1),
+        transforms.RandomRotation((90,90))
+    ])
+    #rotation 90 degrees
+    data_transform_aug_5 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomRotation((90,90))
+    ])
+    # rotation 180 degrees
+    data_transform_aug_6 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomRotation((180,180))
+    ])
+    # rotation 270 degrees
+    data_transform_aug_7 = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
+                       padding_mode='constant'),  # Zero-Pad the image to 224x224
+        transforms.RandomRotation((270,270))
+    ])
 
     # Create list of dataset names
     dataset_names = list(INFO)[:12]  # holds the names of the 12 medmnist+ datasets as a list of strings
 
     train_ds_dict = generate_datasets(dataset_names=dataset_names, split="train", img_size=img_size,
-                                      transformations=data_transform)
-    val_ds_dict = generate_datasets(dataset_names=dataset_names, split="val", img_size=img_size,
-                                    transformations=data_transform)
+                                      transformations=data_transform, aug1=data_transform_aug_1, aug2=data_transform_aug_2,aug3=data_transform_aug_3,
+                                      aug4=data_transform_aug_4, aug5=data_transform_aug_5, aug6=data_transform_aug_6, aug7=data_transform_aug_7)
+    val_ds_dict = generate_datasets_val(dataset_names=dataset_names, split="val", img_size=img_size,
+                                        transformations=data_transform)
 
     train_loader_dict = generate_dataloaders(dataset_dict=train_ds_dict, num_workers=num_workers,
                                              worker_seed=seed_worker, gen=g, shuffle=True, batch_size=batch_size,
@@ -75,7 +135,7 @@ def model_n_data(config: dict, gen):
 
 # function to generate a dictionary holding the 12 specified 2D datasets of medmnist+ instantiated with a given split
 # which is train or validation
-def generate_datasets(dataset_names: list[str], split: str, img_size: int, transformations):
+def generate_datasets(dataset_names: list[str], split: str, img_size: int, transformations, aug1=None, aug2=None,aug3=None,aug4=None,aug5=None, aug6=None, aug7=None ):
     print(f"Loading the {len(dataset_names)} datasets {dataset_names} ")
     ds_dict = {}  # dictionary that holds the 12 MEDMNIST+ dataset objects
     # fills dictionary with 12 MEDMNIST+ dataset objects
@@ -83,6 +143,35 @@ def generate_datasets(dataset_names: list[str], split: str, img_size: int, trans
         DataClass = getattr(medmnist, INFO[dataset_name]['python_class'])
         mnist_dataset = DataClass(split=split, transform=transformations, download=True, as_rgb=True,
                                   size=img_size)
+        #Augment the data if breastmnist or retinamnist        
+        if dataset_name == "breastmnist" or dataset_name == "retinamnist":
+            mnist_dataset_aug1 = DataClass(split=split, transform=aug1, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug2 = DataClass(split=split, transform=aug2, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug3 = DataClass(split=split, transform=aug3, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug4 = DataClass(split=split, transform=aug4, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug5 = DataClass(split=split, transform=aug5, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug6 = DataClass(split=split, transform=aug6, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset_aug7 = DataClass(split=split, transform=aug7, download=True, as_rgb=True,
+                                           size=img_size)
+            mnist_dataset = ConcatDataset([mnist_dataset, mnist_dataset_aug1, mnist_dataset_aug2,mnist_dataset_aug3,mnist_dataset_aug4,mnist_dataset_aug5,mnist_dataset_aug6,mnist_dataset_aug7])
+        ds_dict[dataset_name] = mnist_dataset  # assign dataset as 'value' to new key with name of dataset
+    return ds_dict
+
+def generate_datasets_val(dataset_names: list[str], split: str, img_size: int, transformations):
+    print(f"Loading the {len(dataset_names)} datasets {dataset_names} ")
+    ds_dict = {}  # dictionary that holds the 12 MEDMNIST+ dataset objects
+    # fills dictionary with 12 MEDMNIST+ dataset objects
+    for dataset_name in dataset_names:
+        DataClass = getattr(medmnist, INFO[dataset_name]['python_class'])
+        mnist_dataset = DataClass(split=split, transform=transformations, download=True, as_rgb=True,
+                                  size=img_size)
+
         ds_dict[dataset_name] = mnist_dataset  # assign dataset as 'value' to new key with name of dataset
     return ds_dict
 
