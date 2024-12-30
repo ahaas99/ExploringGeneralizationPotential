@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script evaluates a model on a specified dataset of the MedMNIST+ collection.
+The script evaluates a model on MedMNIST+
 """
 
 # Import packages
@@ -81,26 +81,12 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
-
-
 
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model, num_features = get_backbone(backbone_name=architecture_name, architecture=architecture, num_classes=1000,
+    model, num_features = get_backbone(backbone_name={config['architecture_name']}, architecture=architecture, num_classes=1000,
                                           pretrained=True)
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_backbone_best.pth", map_location='cpu')
@@ -255,28 +241,6 @@ if __name__ == '__main__':
             else:
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
-
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            elif architecture == "alexnet":
-                architecture_name = "alexnet"
-            else:
-                architecture_name = "uni"
-            if img_size == 28:
-                filename = Path(args.embeddings_path) / f"{architecture_name}/{dataset}_embeddings.npz"
-            else:
-                filename = Path(args.embeddings_path) / f"{architecture_name}/{dataset}_{img_size}_embeddings.npz"
-            #print(filename)
-            #data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
-            #data_train = data["arr_0"].item()["train"]
-            #data_val = data["arr_0"].item()["val"]
-            #data_test = data["arr_0"].item()["val"]
             if architecture == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
@@ -295,19 +259,8 @@ if __name__ == '__main__':
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
-            #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
+
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
 
@@ -320,8 +273,8 @@ if __name__ == '__main__':
 
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
-
-            filename = Path(args.output_path_acc) / f"{architecture_name}/head/{img_size}/{dataset}_acc.csv"
+            #safe the test metrics to csv
+            filename = Path(args.output_path_acc) / f"{config["architecture_name"]}/head/{img_size}/{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
     # Run the training
