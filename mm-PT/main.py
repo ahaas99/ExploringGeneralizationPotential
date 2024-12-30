@@ -6,8 +6,8 @@ import random
 import numpy as np
 import wandb
 from model_n_data import model_n_data  # import function for data and model setup
-from mulit_heat_multi_domain_pt import multi_head_multi_domain_training
-from mulit_heat_multi_domain_pt_gradient_accumulation import multi_head_multi_domain_training_gradient_accumulation
+from mulit_head_multi_domain_pt import multi_head_multi_domain_training # import function for data and model setup
+from mulit_head_multi_domain_pt_gradient_accumulation import multi_head_multi_domain_training_gradient_accumulation # import function for data and model setup
 import os
 
 
