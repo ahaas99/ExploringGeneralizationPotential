@@ -10,7 +10,7 @@ The following files collaborate to ensure an efficient and seamless training pip
 - **`model_n_data.py`**: Handles dataset loading and preprocessing.  
 - **`multi_head_multi_domain_pt.py`**: Implements multi-head and multi-domain training logic.  
 - **`multi_head_multi_domain_pt_gradient_accumulation.py`**: Extends multi-head and multi-domain training logic with gradient accumulation.  
-- **`backbones.py`**: Contains backbone architecture definitions used in the models.  
+- **`backbones.py`**: Contains backbone architecture definitions used.  
 - **`utils.py`**: Provides utility functions to support the training process.
 
 For training, the core logic resides in multi_head_multi_domain_pt.py. This file implements the sampling procedure central to the multi-domain, multi-task training paradigm outlined by Woerner et al. (2024).
