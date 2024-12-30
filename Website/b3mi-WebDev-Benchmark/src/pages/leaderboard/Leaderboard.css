@@ -1,0 +1,33 @@
+.leaderboard-container {
+    border: 1px solid #6495ED; /* Custom border color */
+    padding: 20px;             /* Moderate padding */
+    margin: 20px auto;         /* Center the container with margin */
+  }
+  
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .leaderboard-table th,
+  .leaderboard-table td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .leaderboard-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Optional: Style the table headers */
+  .leaderboard-table th {
+    background-color: #6495ED;
+  }
+  
+  /* Optional: Hover effect on table rows */
+  .leaderboard-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  

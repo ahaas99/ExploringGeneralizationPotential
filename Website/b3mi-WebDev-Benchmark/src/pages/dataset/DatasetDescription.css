@@ -1,0 +1,31 @@
+.imageFormatting {
+    max-width: 75%;
+    max-height: 75%;
+}
+
+.centerContents{
+    padding-bottom: 4vh;
+    text-align: left;
+}
+
+.colHeight{
+    max-height: 25vh;
+}
+
+.justifyText {
+    text-align: justify;
+}
+
+.textMargin {
+    margin-right: 2vw;
+}
+
+.flexContainer {
+    display: flex;
+    align-items: center;
+}
+
+.iconColour {
+    color: #6495ED;
+    font-size: 1rem;
+}

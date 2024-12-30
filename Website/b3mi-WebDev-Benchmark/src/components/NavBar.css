@@ -1,0 +1,41 @@
+/* Makes Header appear at the very top without space */
+#root {
+    padding: 0;
+}
+
+/* Gives background colour and adds some padding */
+.NavBar {
+    background-color: #6495ED;
+    padding: 3vh !important;
+    width: 100%;  /* Ensures navbar spans the full width of its container */
+}
+
+/* Larger Font size compared to links, highlighting the home page and name of the benchmark*/
+#NavBarStar {
+    font-size: 2rem;
+    padding-top: 0;
+}
+
+/* White Font colour for better visibility against Background */
+.whiteFont {
+    color: white !important;
+}
+
+.navbar-button {
+    padding: 0.5rem 1vw;
+    margin-left: 1vw;
+    background-color: white; /* Change to your desired color */
+    color: #6495ED;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .navbar-button:hover {
+    background-color: #bfcfee;
+  }
+
+.margeExp {
+    margin: 0vh 6vw !important;
+    max-width: 100% !important;
+}

@@ -1,0 +1,132 @@
+/* UserProfile.css */
+
+.submissions-container {
+    margin: 8vh 8vw;
+    padding: 0vh 2vw;
+    border: 1px solid #6495ED;
+}
+
+.submissions-container h2 {
+    margin: 1em 0em;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: #f5f5f5;
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.hero-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: 1px solid #6495ED;
+    padding: 3vh;
+    margin: 8vh 8vw;
+    }
+    
+  .HeroFormContainer {
+    flex-basis: 50%;
+    height: 100%;
+  }
+    
+  .hero-text {
+    flex-basis: 50%;
+    flex: 1;
+    margin-left: 5vw;
+  }
+  
+  #HeroHeader {
+    text-align: center;
+  }
+  
+  #HeroText {
+    text-align: justify;
+  }
+  
+  .hero-button {
+    display: inline-block;
+    margin: 1vh 1vw;
+    padding: 0.5rem 1vw;
+    background-color: #6495ED; /* Change to your desired color */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+    
+  .hero-button:hover {
+    background-color: #1A64ED;
+  }
+    
+  .form-container {
+    display: flex;
+    flex-direction: column;
+  }
+    
+  .form-group {
+    margin-bottom: 1.5rem; /* Space between form groups */
+  }
+    
+  .form-control {
+    width: 100%; /* Full width for each input */
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+  }
+    
+  .form-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+    
+  .btn-submit {
+    background-color: #6495ED;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+    
+  .btn-submit:hover {
+    background-color: #365da5;
+  }
+  
+  .upload-header {
+    text-align: center;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+  }
+  
+  .id-form {
+    margin-top: 2rem;
+  }
+  
+  .form-description {
+    margin-bottom: 0.5rem;
+    text-align: justify; /* Justifies the text */
+  }  

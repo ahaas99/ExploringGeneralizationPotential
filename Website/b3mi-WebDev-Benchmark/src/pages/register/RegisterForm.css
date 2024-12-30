@@ -1,0 +1,13 @@
+.formContainer {
+    background-color: #6495ED;
+    padding: 3vh 3vw;
+    margin-top: 12vh;
+    max-width: 25% !important;
+
+}
+
+#registerHeader {
+    margin-bottom: 4vh;
+    border-radius: 8px;
+    color: white;
+}

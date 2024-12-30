@@ -1,0 +1,17 @@
+.arrow-rotate {
+    transform: rotate(-180deg);  
+    transition: transform 0.3s ease;
+}
+
+.accordion-button::after {
+    background-image: none !important;
+}
+
+.testColour {
+    color: white !important;
+    background-color: #6495ED !important;
+}
+
+.marginContainers {
+    margin: 1vh 8vw;
+}
