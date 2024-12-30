@@ -174,10 +174,10 @@ if __name__ == '__main__':
     if args.seed:
         config['seed'] = args.seed
 
-    if args.seed:
+    if args.output_path_embeddings:
         config['output_path_embeddings'] = args.output_path_embeddings
 
-    if args.seed:
+    if args.output_path_acc:
         config['output_path_acc'] = args.output_path_acc
 
     # Seed the training and data loading so both become deterministic
