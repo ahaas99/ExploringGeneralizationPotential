@@ -7,22 +7,20 @@
 # Fixed Parameters
 data_path: '/mnt/data/'  # Where the dataset is stored
 output_path: '/mnt/data/modelsalex/models/multihead_neu/'  # Where the trained model shall be stored.
-output_path_embeddings: '/mnt/data/embeddings/resnet18'  # Where the trained model shall be stored
-output_path_accuracies: '/mnt/data/accuracies/resnet18'  # Where the trained model shall be stored
+output_path_embeddings: '/mnt/data/embeddings/resnet18'  # Where embeddings are stored
+output_path_accuracies: '/mnt/data/accuracies/resnet18'  # Where the accuracies are stored
 epochs: 100  # How many epochs to train for.
 learning_rate: 0.0001  # Learning rate
-MAX_GPU_BATCH_SIZE: 32
+MAX_GPU_BATCH_SIZE: 32 # Maximum Batch size for the training on the GPU at the same time.
 batch_size: 64  # Batch size for the training.
 batch_size_eval: 256  # Batch size for the evaluation.
 device: 'cuda:1'  # Which device to run the computations on.
 num_workers: 4
-medmnistc_path: '/mnt/data/new/datasets/medmnistc'
+medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the vorrupted dataset is stored
 
 # Modifiable Parameters
-#dataset: 'chestmnist'  # Which dataset to use. ('bloodmnist', 'breastmnist', 'chestmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist', 'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist')
 img_size: 224  # Height and width of the input image. (28, 64, 128, 224)
 training_procedure: 'endToEnd'  # Which training procedure to use. ('endToEnd', 'linearProbing', 'kNN')
-architecture: 'hf_hub:prov-gigapath/prov-gigapath'#'hf_hub:prov-gigapath/prov-gigapath'#'hf_hub:timm/vit_base_patch14_dinov2.lvd142m'#hf_hub:timm/vit_base_patch14_dinov2.lvd142mhf_hub:timm/vit_base_patch14_dinov2.lvd142m'vit_base_patch16_224.dino'#'hf-hub:MahmoodLab/uni'#'vit_base_patch16_224.dino'  # Which model to use. ('vit_base_patch14_reg4_dinov2.lvd142m', 'alexnet', 'resnet18', 'densenet121', 'efficientnet_b4', 'vit_base_patch16_224', 'vit_base_patch16_clip_224', 'eva02_base_patch16_clip_224', 'vit_base_patch16_224.dino', 'samvit_base_patch16')
-architecture_name: 'prov'#
-#k: 20  # Number of neighbors for the kNN.
+architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
+architecture_name: 'prov'# 'prov' 'dinov2' 'dino' 'uni'
 seed: 9930641  # Seed for random operations for reproducibility. (9930641, 115149041, 252139603)
