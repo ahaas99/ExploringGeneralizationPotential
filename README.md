@@ -22,14 +22,16 @@ For testing there are 2 files:
 ## Code Structure for mm-PT aug
 The code structure is the same for mm-PT aug in comparision with mm-PT. Following modifications where made
 
-The following files collaborate to ensure an efficient and seamless training pipeline:
 - **`model_n_data.py`**: Added data augmentation to breastmnist and retinamnist
 - **`multi_head_multi_domain_pt.py`**: Modified the logic that the model sees every dataset the same number of times
 - **`multi_head_multi_domain_pt_gradient_accumulation.py`**: Modified the logic that the model sees every dataset the same number of times
 
-For training, the core logic resides in multi_head_multi_domain_pt.py. This file implements the sampling procedure central to the multi-domain, multi-task training paradigm outlined by Woerner et al. (2024).
+Testsing is the same to mm-PT.
 
-Testsing is similar to mm-PT 
+## Code Structure for pre-trained-training
+- **`config.yaml`**: Configuration file specifying training parameters and settings.  
+- **`feature_extraction.py`**: Extracts the features from the underlying backbones so only the heads can be trained by using the image embeddings
+- **`evaluate_with_embeddings_*.py`**: Every file trains 12 heads for the 12 datasets of MedMNIST+ using a different classifier (* = kNN, linear classifier, lightGBM, Random Forest and SVM)
 
 Cited sources:
 
