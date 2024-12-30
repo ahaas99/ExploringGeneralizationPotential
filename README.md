@@ -32,7 +32,7 @@ Testsing is the same to mm-PT.
 - **`config.yaml`**: Configuration file specifying training parameters and settings.  
 - **`feature_extraction.py`**: Extracts the features from the underlying backbones so only the heads can be trained by using the image embeddings
 - **`evaluate_with_embeddings_*.py`**: Every file trains 12 heads for the 12 datasets of MedMNIST+ using a different classifier (* = kNN, linear classifier, lightGBM, Random Forest and SVM), saves the models and evaluates the models and saves the metrics.
-
+- **`evaluate_mutli_head_corrupted_*.py`**: Evaluates the trained and saved heads on the corrupted MedMNIST-C.
 Cited sources:
 
 Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
