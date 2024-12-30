@@ -161,11 +161,9 @@ if __name__ == '__main__':
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
-    parser.add_argument("--embeddings_path", required=False, type=str, default='/mnt/data/embeddingsalex/embeddings/',
+    parser.add_argument("--output_path_embeddings", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--output_path", required=False, type=str, default='/mnt/data/modelsalex/models/',
-                        help="Path to the output folder.")
-    parser.add_argument("--output_path_acc", required=False, type=str, default='accuracies/',
+    parser.add_argument("--output_path_acc", required=False, type=str,
                         help="Path to the output folder.")
     args = parser.parse_args()
     config_file = args.config_file
@@ -192,11 +190,12 @@ if __name__ == '__main__':
 
     if args.seed:
         config['seed'] = args.seed
-    if args.output_path:
-        config['output_path'] = args.output_path
 
-    if args.embeddings_path:
-        config['embeddings_path'] = args.embeddings_path
+    if args.seed:
+        config['output_path_embeddings'] = args.output_path_embeddings
+
+    if args.seed:
+        config['output_path_acc'] = args.output_path_acc
 
     # Seed the training and data loading so both become deterministic
     if config['architecture'] == 'alexnet':
@@ -267,10 +266,9 @@ if __name__ == '__main__':
             else:
                 architecture_name = "uni"
             if img_size == 28:
-                filename = Path(args.embeddings_path) / f"{architecture_name}/{dataset}_embeddings.npz"
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_embeddings.npz"
             else:
-                filename = Path(args.embeddings_path) / f"{architecture_name}/{dataset}_{img_size}_embeddings.npz"
-            print(filename)
+                filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
             data = np.load(filename, allow_pickle=True)
             # data["arr_0"].item()["train"]["embeddings"]
             data_train = data["arr_0"].item()["train"]
@@ -302,7 +300,7 @@ if __name__ == '__main__':
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
     # Run the training
