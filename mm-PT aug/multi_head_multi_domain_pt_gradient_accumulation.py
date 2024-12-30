@@ -90,15 +90,15 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
     gradient_accumulation_steps = config["batch_size"] // config["MAX_GPU_BATCH_SIZE"]
 
     # Get lengths of training dataloaders
-    loader_len_train = {}  # holds the lengths of the dataloader for each dataset
-    sum_loader_length_train = 0  # holds total length of all the dataloaders in a given split combined
     for dataset_name, train_loader in loader_dict['train_loader_dict'].items():
-        loader_len_train[dataset_name] = len(train_loader)
-        sum_loader_length_train += len(train_loader)
+        # Cap the lengths of every Dataloader to the smallest(breastmnist)
+        loader_len_train[dataset_name] = len(loader_dict['train_loader_dict']["breastmnist"]) 
+        sum_loader_length_train += len(loader_dict['train_loader_dict']["breastmnist"])
     # Compute initial probabilities of picking dataloader to get a batch from
     probability_dict = {}
     for dataset_name in dataset_names:
         probability_dict[dataset_name] = loader_len_train[dataset_name] / sum_loader_length_train
+
 
     # Create variables to store the best performing model
     print("\tInitialize helper variables ...")
@@ -133,10 +133,6 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
         print(f"\t\t\t Train:")
         model.train()
         train_loss = 0
-        # y_true_train, y_pred_train = torch.tensor([]).to(device), torch.tensor([]).to(device)
-        # y_true_train_multi_label, y_pred_train_multi_label = torch.empty((1, 14)).to(device), torch.empty((1, 14)).to(
-        #    device)
-
         running_loader_length_sum = sum_loader_length_train
         y_true_train_dict, y_pred_train_dict = {}, {}
 
@@ -156,7 +152,6 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
 
 
             # adjust probabilities for later use
-            # print(f"len_dict = {len_dict}")
             if len_dict[random_dataset] > 0:
                 len_dict[random_dataset] -= 1
             else:
@@ -262,10 +257,6 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
 
 
 
-        # AUC_Train = get_AUC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Bal_Acc_Train = get_Balanced_ACC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Co_Train = get_Cohen(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Prec_Train = get_Precision(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
 
         # Update the learning rate
         scheduler.step(epoch=epoch)
@@ -295,11 +286,14 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
                 # Swap Head for the Model
                 model.head = head_dict[dataset_name]
                 if task_dict[dataset_name] == "multi-label, binary-class":
-                    criterion = nn.BCEWithLogitsLoss().to(device)
+                    criterion = CustomBCEWithLogitsLoss().to(device)
+                    # criterion = nn.BCEWithLogitsLoss().to(device)
                     prediction = nn.Sigmoid()
                 else:
-                    criterion = nn.CrossEntropyLoss().to(device)
+                    criterion = CustomCrossEntropyLoss().to(device)
+                    # criterion = nn.CrossEntropyLoss().to(device)
                     prediction = nn.Softmax(dim=1)
+
 
                 # iterating over all the batches of a single dataloader
                 for images, labels in tqdm(single_val_loader):
@@ -307,16 +301,23 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
                     images = images.to(device)
                     outputs = model(images)
                     # Run the forward pass
-                    if task_dict[dataset_name] == 'multi-label, binary-class':
+                      if task_dict[dataset_name] == 'multi-label, binary-class':
                         labels = labels.to(torch.float32).to(device)
-                        loss = criterion(outputs, labels)
+                        #weight the loss to make sure every dataset has the same impact
+                        loss = criterion(outputs, labels,
+                                         multiplier=loader_len_val["breastmnist"] / loader_len_val[dataset_name])
+                        # loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
 
                     else:
                         labels = torch.squeeze(labels, 1).long().to(device)
-                        loss = criterion(outputs, labels)
+                        #weight the loss to make sure every dataset has the same impact
+                        loss = criterion(outputs, labels,
+                                         multiplier=loader_len_val["breastmnist"] / loader_len_val[dataset_name])
+                        # loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
                         labels = labels.float().resize_(len(labels), 1)
+
 
                     # Store the current loss
                     val_loss += loss.item()
