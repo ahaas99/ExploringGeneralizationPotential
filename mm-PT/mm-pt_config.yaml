@@ -19,8 +19,6 @@ num_workers: 4
 medmnistc_path: '/mnt/data/new/datasets/medmnistc' # Where the vorrupted dataset is stored
 
 # Modifiable Parameters
-img_size: 224  # Height and width of the input image. (28, 64, 128, 224)
-training_procedure: 'endToEnd'  # Which training procedure to use. ('endToEnd', 'linearProbing', 'kNN')
 architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
 architecture_name: 'prov'# 'prov' 'dinov2' 'dino' 'uni'
 seed: 9930641  # Seed for random operations for reproducibility. (9930641, 115149041, 252139603)
