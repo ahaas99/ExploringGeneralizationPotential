@@ -86,7 +86,7 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
 
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model, num_features = get_backbone(backbone_name={config['architecture_name']}, architecture=architecture, num_classes=1000,
+    model, num_features = get_backbone(backbone_name={config['architecture_name']}, architecture=config["architecture"], num_classes=1000,
                                           pretrained=True)
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_backbone_best.pth", map_location='cpu')
@@ -214,15 +214,15 @@ if __name__ == '__main__':
         task, in_channel, num_classes = info['task'], info['n_channels'], len(info['label'])
         DataClass = getattr(medmnist, info['python_class'])
         # Iterate over all image sizes
-        for img_size in [28, 64,128,224]:
+        for img_size in [28, 64, 128, 224]:
             df = pd.DataFrame(columns=["dataset", "img_size", "Acc_Test", "Bal_Acc", "AUC", "CO", "Prec"])
             # Extract the dataset and its metadata
             info = INFO[dataset]
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
-            config["architecture"]
+
+          
             print(f"\t\t\t ... for {config["architecture"]}...")
             access_token = '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'
             # Create the model
@@ -239,7 +239,7 @@ if __name__ == '__main__':
                 model = timm.create_model("hf_hub:prov-gigapath/prov-gigapath", pretrained=True,
                                           num_classes=num_classes)
             else:
-                model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
+                model = timm.create_model(config["architecture"], pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
             if config["architecture"] == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
@@ -266,7 +266,6 @@ if __name__ == '__main__':
 
             config["dataset"] = dataset
             config["img_size"] = img_size
-            config["architecture"] = architecture
             
             #evaluate the mdoels and safe the metrics
             acc,  bal_acc,  auc, co, prec = evaluate(config,dataset=dataset,test_loader=test_loader)
