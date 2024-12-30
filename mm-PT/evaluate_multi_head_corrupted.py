@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script evaluates a model on a specified dataset of the MedMNIST+ collection.
+The script evaluates a model on all datasets of MedMNIST-C
 """
 
 # Import packages
@@ -158,26 +158,12 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
-
-
 
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model, num_features = get_backbone(backbone_name=architecture_name, architecture=architecture, num_classes=1000,
+    model, num_features = get_backbone(backbone_name=config["architecture_name"], architecture=config["architecture"], num_classes=1000,
                                           pretrained=True)
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_backbone_best.pth", map_location='cpu')
@@ -188,10 +174,10 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_{dataset}_best.pth", map_location='cpu')
     classifier.load_state_dict(checkpoint)  # , strict=False)
-    print(model.head)
 
     model.head = classifier
-    print(model.head)
+
+  
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
@@ -235,9 +221,7 @@ if __name__ == '__main__':
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
     parser.add_argument("--output_path", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--embeddings_path", required=False, type=str, default='embeddings/',
-                        help="Path to the output folder.")
-    parser.add_argument("--output_path_acc", required=False, type=str, default='accuracies/',
+    parser.add_argument("--output_path_acc", required=False, type=str,
                         help="Path to the output folder.")
     args = parser.parse_args()
     config_file = args.config_file
@@ -267,9 +251,9 @@ if __name__ == '__main__':
 
     if args.output_path:
         config['output_path'] = args.output_path
-
-    if args.embeddings_path:
-        config['embeddings_path'] = args.embeddings_path
+    
+    if args.output_path_acc:
+        config['output_path'] = args.output_path_acc
 
     # Seed the training and data loading so both become deterministic
     if config['architecture'] == 'alexnet':
@@ -310,51 +294,33 @@ if __name__ == '__main__':
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
-            architecture = config["architecture"]
-            print(f"\t\t\t ... for {architecture}...")
+            
+            print(f"\t\t\t ... for {config["architecture"]}...")
             access_token = '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'
             # Create the model
-            if architecture == 'alexnet':
+            if config["architecture"] == 'alexnet':
                 model = alexnet(weights=AlexNet_Weights.DEFAULT)
                 model.classifier[6] = nn.Linear(4096, config['num_classes'])
-                #model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])  # Remove the classifier
-            elif architecture == 'hf-hub:MahmoodLab/uni':
+                model.classifier = nn.Sequential(*list(model.classifier.children())[:-1])  # Remove the classifier
+            elif config["architecture"] == 'hf-hub:MahmoodLab/uni':
                 login(access_token)
                 model = timm.create_model("hf-hub:MahmoodLab/uni", pretrained=True, init_values=1e-5,
                                           dynamic_img_size=True, num_classes=num_classes)
-            elif architecture == 'hf_hub:prov-gigapath/prov-gigapath':
+            elif config["architecture"] == 'hf_hub:prov-gigapath/prov-gigapath':
                 login(access_token)
                 model = timm.create_model("hf_hub:prov-gigapath/prov-gigapath", pretrained=True,
                                           num_classes=num_classes)
             else:
-                model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
+                model = timm.create_model(config["architecture"], pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
 
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            elif architecture == "alexnet":
-                architecture_name = "alexnet"
-            else:
-                architecture_name = "uni"
 
-            #print(filename)
-            #data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
-            #data_train = data["arr_0"].item()["train"]
-            #data_val = data["arr_0"].item()["val"]
-            #data_test = data["arr_0"].item()["val"]
-            if architecture == 'alexnet':
+            if config["architecture"] == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
                 mean, std = model.default_cfg['mean'], model.default_cfg['std']
             total_padding = 0
-            if architecture == 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m':
+            if config["architecture"] == 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m':
                 total_padding = max(0, 518 - img_size)
             else :
                 total_padding = max(0, 224 - img_size)
@@ -368,18 +334,8 @@ if __name__ == '__main__':
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
             #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
+          
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
             config["dataset"] = dataset
@@ -465,10 +421,6 @@ if __name__ == '__main__':
                 else:
                     config["dataset"] = dataset
                     config["img_size"] = img_size
-                    config["architecture"] = architecture
-                    print(corruption)
-                    print(total_padding)
-                    print(img_size)
                     if img_size!=224:
                     # Load the corrupted test set, according to the selected corruption
                         corrupted_test_test = CorruptedMedMNIST(
@@ -492,7 +444,7 @@ if __name__ == '__main__':
                             norm_std=std,
                             padding=total_padding
                         )
-
+                    #load the corrupted test set
                     test_loader = DataLoader(corrupted_test_test, batch_size=config['batch_size_eval'], shuffle=False,
                                              num_workers=4
                                              , worker_init_fn=seed_worker, generator=g)
@@ -516,7 +468,7 @@ if __name__ == '__main__':
             # If the size of the images is 28 and its either bubbly, stain_deposit or characters the corruption doesnt exist,
             # so skip if true
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/head/corrupted/{img_size}/{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{architecture_name}/head/corrupted/{img_size}/{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
     # Run the training
