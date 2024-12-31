@@ -210,13 +210,18 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             images = images.to(device)
 
             # set loss functions (has to be done each iteration, so per batch, as task will change)
+            #use a weighted loss if if config['weighted_loss']==True
             if task_dict[random_dataset] == "multi-label, binary-class":
-                #criterion = CustomBCEWithLogitsLoss().to(device)
-                criterion = nn.BCEWithLogitsLoss().to(device)
+                if config['weighted_loss']:
+                    criterion = CustomBCEWithLogitsLoss().to(device)
+                else:
+                    criterion = nn.BCEWithLogitsLoss().to(device)
                 prediction = nn.Sigmoid()
             else:
-                #criterion = CustomCrossEntropyLoss().to(device)
-                criterion = nn.CrossEntropyLoss().to(device)
+                if config['weighted_loss']:
+                    criterion = CustomCrossEntropyLoss().to(device)
+                else:
+                    criterion = nn.CrossEntropyLoss().to(device)
                 prediction = nn.Softmax(dim=1)
 
             if task_dict[random_dataset] == 'multi-label, binary-class':
@@ -230,8 +235,10 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             # Run the forward pass
             outputs = model(images)
             # Compute the loss and perform backpropagation
-            #loss = criterion(outputs, labels, multiplier=loader_len_train['breastmnist']/loader_len_train[random_dataset])
-            loss = criterion(outputs, labels)
+            if config['weighted_loss']:
+                loss = criterion(outputs, labels, multiplier=loader_len_train['breastmnist']/loader_len_train[random_dataset])
+            else:
+                loss = criterion(outputs, labels)
             train_loss += loss.item()
             loss.backward()
             outputs_detached = outputs.clone().detach()
@@ -264,6 +271,8 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             Acc_TrainPartitioned = Acc_TrainPartitioned + Acc
         Acc_TrainPartitioned=Acc_TrainPartitioned/12
         df = pd.DataFrame()
+        
+        #compute the metrics and safe in a DataFrame
         for dataset_name in dataset_names:
             Acc = get_ACC(y_true_train_dict[dataset_name].cpu().numpy(), y_pred_train_dict[dataset_name].cpu().numpy(), task_dict[dataset_name])
             column1 = "Acc_" + str(dataset_name)+ "_Train"
@@ -286,12 +295,6 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             else:
                 df = df.join(df1)
 
-
-
-        # AUC_Train = get_AUC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Bal_Acc_Train = get_Balanced_ACC(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Co_Train = get_Cohen(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
-        # Prec_Train = get_Precision(y_true_train.cpu().numpy(), y_pred_train.cpu().numpy(), config['task'])
 
         # Update the learning rate
         scheduler.step(epoch=epoch)
@@ -337,14 +340,18 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
                     # Run the forward pass
                     if task_dict[dataset_name] == 'multi-label, binary-class':
                         labels = labels.to(torch.float32).to(device)
-                        #loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
-                        loss = criterion(outputs, labels)
+                        if config['weighted_loss']:
+                            loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        else:
+                            loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
 
                     else:
                         labels = torch.squeeze(labels, 1).long().to(device)
-                        #loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
-                        loss = criterion(outputs, labels)
+                        if config['weighted_loss']:
+                            loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        else:
+                            loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
                         labels = labels.float().resize_(len(labels), 1)
 
