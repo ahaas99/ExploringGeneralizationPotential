@@ -39,3 +39,5 @@ Cited sources:
 
 Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
 
+The work and the code are based on the work of [Sebastian Dörrich](https://github.com/sdoerrich97/rethinking-model-prototyping-MedMNISTPlus) and [Francesco di Salvo](https://github.com/francescodisalvo05/medmnistc-api) and their respective papers.
+
