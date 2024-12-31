@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script evaluates a model on a specified dataset of the MedMNIST+ collection.
+The script evaluates a model on all datasets of MedMNIST-C
 """
 
 # Import packages
