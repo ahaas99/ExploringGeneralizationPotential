@@ -306,7 +306,6 @@ if __name__ == '__main__':
     if args.output_path:
         config['output_path'] = args.output_path
 
-    
     if args.output_path_embeddings:
         config['output_path_embeddings'] = args.output_path_embeddings
 
