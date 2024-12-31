@@ -54,9 +54,11 @@ def evaluate(config: dict, train_loader: DataLoader, val_loader:DataLoader,test_
     """
     Evaluate a model on the specified dataset.
 
-    :param config: Dictionary containing the parameters and hyperparameters.
+    :param config: Dictionary containing the parameters and hyperparameters and the used dataset.
     :param train_loader: DataLoader for the training set.
+    :param val_loader: DataLoader for the validation set.
     :param test_loader: DataLoader for the test set.
+    :param model: the model that should be trained.
     """
 
     # Start code
@@ -73,6 +75,7 @@ def evaluate(config: dict, train_loader: DataLoader, val_loader:DataLoader,test_
         architecture_name = "dino"
     else:
         architecture_name = "uni"
+    #Train only the head of the model
     model = model.get_classifier()
     checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{architecture_name}_s{config['seed']}_best.pth"
     checkpoint = torch.load(checkpoint_file, map_location='cpu')
@@ -287,7 +290,7 @@ if __name__ == '__main__':
                                     , worker_init_fn=seed_worker, generator=g)
             test_loader = DataLoader(test_data, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
-
+          
             config["dataset"] = dataset
             config["img_size"] = img_size
             config["architecture"] = architecture
