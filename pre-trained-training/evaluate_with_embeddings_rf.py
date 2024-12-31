@@ -47,15 +47,17 @@ from utils import (calculate_passed_time, seed_worker, extract_embeddings, extra
 
 
 
-def evaluate_with_embeddings_rf(config: dict, support_set: dict,validation_set: dict,data_set: dict,  dataset: str):
+def evaluate_with_embeddings_rf(config: dict, support_set: dict, validation_set: dict, data_set: dict, dataset: str):
     """
-    Evaluate a model on the specified dataset.
+    Evaluates a Random Forest model using precomputed embeddings on a specified dataset.
 
-    :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
-    :param test_loader: DataLoader for the test set.
+    Parameters:
+        config (dict): Dictionary containing parameters for the Random Forest model and evaluation process.
+        support_set (dict): Dictionary representing the training set.
+        validation_set (dict): Dictionary representing the validation set, used to assess performance during or after training.
+        data_set (dict): Dictionary containing the test dataset to evaluate performance.
+        dataset (str): Name of the dataset to be evaluated, used for logging or selecting specific configurations.
     """
-
     # Start code
     start_time = time.time()
 
