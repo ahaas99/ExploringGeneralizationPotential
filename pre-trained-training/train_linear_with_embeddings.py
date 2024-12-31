@@ -55,6 +55,7 @@ def train_only_head(config: dict, train_loader: DataLoader, val_loader: DataLoad
     :param config: Dictionary containing the parameters and hyperparameters.
     :param train_loader: DataLoader for the training set.
     :param val_loader: DataLoader for the validation set.
+    :param model_to_use: model that should be used to train.
     """
     architecture_name = ""
     if config['architecture'] == 'hf_hub:prov-gigapath/prov-gigapath':
@@ -268,12 +269,14 @@ if __name__ == '__main__':
     parser.add_argument("--img_size", required=False, type=int, help="Which image size to use.")
     parser.add_argument("--training_procedure", required=False, type=str, help="Which training procedure to use.")
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
+    parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
-    parser.add_argument("--embeddings_path", required=False, type=str, default='embeddings/',
+    parser.add_argument("--output_path", required=False, type=str,
                         help="Path to the output folder.")
-    parser.add_argument("--output_path", required=False, type=str, default='models',
-                        help="Path to the output folder.")
-
+    parser.add_argument("--output_path_embeddings", required=False, type=str,
+                        help="Path to the output folder of the embeddings.")
+    parser.add_argument("--output_path_acc", required=False, type=str,
+                        help="Path to the output folder of the metrics.")
     args = parser.parse_args()
     config_file = args.config_file
 
@@ -294,15 +297,21 @@ if __name__ == '__main__':
     if args.architecture:
         config['architecture'] = args.architecture
 
-    # If a seed is specified, overwrite the seed in the config file
+    if args.k:
+        config['k'] = args.k
+
     if args.seed:
         config['seed'] = args.seed
-
+     
     if args.output_path:
-            config['output_path'] = args.output_path
+        config['output_path'] = args.output_path
 
-    if args.embeddings_path:
-            config['embeddings_path'] = args.embeddings_path
+    
+    if args.output_path_embeddings:
+        config['output_path_embeddings'] = args.output_path_embeddings
+
+    if args.output_path_acc:
+        config['output_path_acc'] = args.output_path_acc
 
     # Seed the training and data loading so both become deterministic
     wandb.login()
@@ -336,7 +345,7 @@ if __name__ == '__main__':
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
             DataClass = getattr(medmnist, info['python_class'])
             #for architecture in ['alexnet','hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
-            architecture='alexnet'
+            architecture=config["architecture"]
             print(f"\t\t\t ... for {architecture}...")
             access_token = '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'
                 # Create the model
