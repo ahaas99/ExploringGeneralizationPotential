@@ -16,6 +16,29 @@ from utils import calculate_passed_time, get_ACC, get_AUC, get_Balanced_ACC, \
 from backbones import get_backbone
 
 
+#Custom Loss if you want to weight the loss depending on the dataset
+class CustomBCEWithLogitsLoss(nn.Module):
+    def __init__(self):
+        super(CustomBCEWithLogitsLoss, self).__init__()
+
+    def forward(self, inputs, targets, multiplier):
+        return multiplier * F.binary_cross_entropy_with_logits(
+            inputs,
+            targets
+        )
+
+
+#Custom Loss if you want to weight the loss depending on the dataset
+class CustomCrossEntropyLoss(nn.Module):
+    def __init__(self):
+        super(CustomCrossEntropyLoss, self).__init__()
+
+    def forward(self, input: Tensor, target: Tensor, multiplier) -> Tensor:
+        return multiplier * F.cross_entropy(
+            input,
+            target,
+        )
+
 # function to generate a dictionary holding the dataloaders for the 12 specified 2D datasets of medmnist+
 def generate_heads(dataset_names, num_features, device):
     print(f"Generating heads for the {len(dataset_names)} datasets {dataset_names}")
@@ -86,7 +109,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
     # Create the optimizer
     print("\tCreate the optimizer")
     optimizer = AdamW(model.parameters(), lr=learning_rate)
-
+    #Initialize the gradient_accumulation_steps
     gradient_accumulation_steps = config["batch_size"] // config["MAX_GPU_BATCH_SIZE"]
 
     # Get lengths of training dataloaders
@@ -173,17 +196,19 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
             #images = images.to(device)
 
             # set loss functions (has to be done each iteration, so per batch, as task will change)
+            #use a weighted loss if if config['weighted_loss']==True
             if task_dict[random_dataset] == "multi-label, binary-class":
-                criterion = nn.BCEWithLogitsLoss().to(device)
+                if config['weighted_loss']:
+                    criterion = CustomBCEWithLogitsLoss().to(device)
+                else:
+                    criterion = nn.BCEWithLogitsLoss().to(device)
                 prediction = nn.Sigmoid()
             else:
-                criterion = nn.CrossEntropyLoss().to(device)
+                if config['weighted_loss']:
+                    criterion = CustomCrossEntropyLoss().to(device)
+                else:
+                    criterion = nn.CrossEntropyLoss().to(device)
                 prediction = nn.Softmax(dim=1)
-
-            if task_dict[random_dataset] == 'multi-label, binary-class':
-                labels = labels.to(torch.float32).to(device)
-            else:
-                labels = torch.squeeze(labels, 1).long().to(device)
 
             # Swap Head for the Mode
             model.head = head_dict[random_dataset]
@@ -202,7 +227,11 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
             # Run the forward pass
                 outputs = model(imagesx)
             # Compute the loss and perform backpropagation
-                loss = criterion(outputs, labelsx)
+                # Compute the loss and perform backpropagation
+                if config['weighted_loss']:
+                    loss = criterion(outputs, labels, multiplier=loader_len_train['breastmnist']/loader_len_train[random_dataset])
+                else:
+                    loss = criterion(outputs, labels)
                 loss = loss / gradient_accumulation_steps
                 train_loss += loss.item()
                 loss.backward()
@@ -237,7 +266,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
             Acc_TrainPartitioned = Acc_TrainPartitioned + Acc
         Acc_TrainPartitioned = Acc_TrainPartitioned / 12
         df = pd.DataFrame()
-        #calculate the metrics for train and safe as csv
+        #calculate the metrics for train and safe as csv later
         for dataset_name in dataset_names:
             Acc = get_ACC(y_true_train_dict[dataset_name].cpu().numpy(), y_pred_train_dict[dataset_name].cpu().numpy(), task_dict[dataset_name])
             column1 = "Acc_" + str(dataset_name)+ "_Train"
@@ -309,12 +338,19 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
                     # Run the forward pass
                     if task_dict[dataset_name] == 'multi-label, binary-class':
                         labels = labels.to(torch.float32).to(device)
-                        loss = criterion(outputs, labels)
+                        # use a weighted loss if config['weighted_loss']==True
+                        if config['weighted_loss']:
+                            loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        else:
+                            loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
 
                     else:
                         labels = torch.squeeze(labels, 1).long().to(device)
-                        loss = criterion(outputs, labels)
+                        if config['weighted_loss']:
+                            loss = criterion(outputs, labels, multiplier=loader_len_val["breastmnist"]/loader_len_val[dataset_name])
+                        else:
+                            loss = criterion(outputs, labels)
                         outputs = prediction(outputs)
                         labels = labels.float().resize_(len(labels), 1)
 
