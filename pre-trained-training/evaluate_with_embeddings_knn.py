@@ -43,8 +43,10 @@ def evaluate_with_embeddings(config: dict, support_set: dict, data_set: dict, k:
     Evaluate a model on the specified dataset.
 
     :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
-    :param test_loader: DataLoader for the test set.
+    :param support_set: Dictionary representing the training set, used for training the kNN.
+    :param data_set: Test set, used for evaluation.
+    :param k: Number of k Nearest Neighbours.
+    :param dataset: Name of the dataset.
     """
 
     # Start code
