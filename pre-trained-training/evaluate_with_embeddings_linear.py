@@ -202,6 +202,9 @@ if __name__ == '__main__':
     if args.output_path_embeddings:
         config['output_path_embeddings'] = args.output_path_embeddings
 
+    if args.output_path_acc:
+        config['output_path_acc'] = args.output_path_accs
+
     # Seed the training and data loading so both become deterministic
     if config['architecture'] == 'alexnet':
         torch.backends.cudnn.benchmark = True  # Enable the benchmark mode in cudnn
