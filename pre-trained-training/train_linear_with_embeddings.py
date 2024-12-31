@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script trains a model on a specified dataset of the MedMNIST+ collection and saves the best performing model.
+The script trains a model on all datasets of the MedMNIST+ collection and saves the best performing model.
 """
 
 # Import packages
