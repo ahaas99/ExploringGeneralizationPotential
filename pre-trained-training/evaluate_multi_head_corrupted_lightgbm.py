@@ -142,14 +142,17 @@ class DataFromDict(Dataset):
 
 
 
-def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
+def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     """
-    Evaluate a model on the specified dataset.
+    Evaluates a model on the specified dataset.
 
-    :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
-    :param test_loader: DataLoader for the test set.
+    Parameters:
+        config (dict): Dictionary containing parameters for the model and evaluation process.
+        dataset: The dataset to be evaluated, used for logging or selecting specific configurations.
+        test_loader (DataLoader): DataLoader for the test set.
+        model: The model to be evaluated.
     """
+
 
     # Start code
     start_time = time.time()
