@@ -40,7 +40,7 @@ Cited sources:
 
 The work and the code is based on the work of [Sebastian Dörrich](https://github.com/sdoerrich97/rethinking-model-prototyping-MedMNISTPlus) and [Francesco di Salvo](https://github.com/francescodisalvo05/medmnistc-api) and their respective papers: [Rethinking Model Prototyping through the MedMNIST+ Dataset Collection](https://arxiv.org/abs/2404.15786) and [MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions](https://arxiv.org/abs/2406.17536).
 
-The website and part of the Code was written in Collaboration with [Marius Bachmeier](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
+The website and part of the Code was written in Collaboration with [Marius Bachmeier](https://github.com/mariusbachmeier/Bachelor-Thesis).
 
 Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
 
