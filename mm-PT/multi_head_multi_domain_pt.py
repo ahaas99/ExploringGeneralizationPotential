@@ -324,12 +324,16 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
                 # Swap Head for the Model
                 model.head = head_dict[dataset_name]
                 if task_dict[dataset_name] == "multi-label, binary-class":
-                    #criterion = CustomBCEWithLogitsLoss().to(device)
-                    criterion = nn.BCEWithLogitsLoss().to(device)
+                    if config['weighted_loss']:
+                        criterion = CustomBCEWithLogitsLoss().to(device)
+                    else:
+                        criterion = nn.BCEWithLogitsLoss().to(device)
                     prediction = nn.Sigmoid()
                 else:
-                    #criterion = CustomCrossEntropyLoss().to(device)
-                    criterion = nn.CrossEntropyLoss().to(device)
+                    if config['weighted_loss']:
+                        criterion = CustomCrossEntropyLoss().to(device)
+                    else:
+                        criterion = nn.CrossEntropyLoss().to(device)
                     prediction = nn.Softmax(dim=1)
 
                 # iterating over all the batches of a single dataloader
