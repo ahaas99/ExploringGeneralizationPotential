@@ -31,7 +31,9 @@ Testsing is the same to mm-PT.
 ## Code Structure for pre-trained-training
 - **`config.yaml`**: Configuration file specifying training parameters and settings.  
 - **`feature_extraction.py`**: Extracts the features from the underlying backbones so only the heads can be trained by using the image embeddings
-- **`evaluate_with_embeddings_*.py`**: Every file trains 12 heads for the 12 datasets of MedMNIST+ using a different classifier (* = kNN, linear classifier, lightGBM, Random Forest and SVM), saves the models and evaluates the models and saves the metrics.
+- **`evaluate_with_embeddings_*.py`**: Every file trains 12 heads for the 12 datasets of MedMNIST+ using a different classifier (* = kNN,  lightGBM, Random Forest and SVM), saves the models and evaluates the models and saves the metrics.
+- **`train_linear_with_embeddings.py`**: Trains 12 heads for the 12 datasets of MedMNIST+ using a linear classifier and saves the models.
+- **`evaluate_with_embeddings_linear.py`**: Evaluates the trained models on train, validation and test, set.
 - **`evaluate_mutli_head_corrupted_*.py`**: Evaluates the trained and saved heads on the corrupted MedMNIST-C.
 Cited sources:
 
