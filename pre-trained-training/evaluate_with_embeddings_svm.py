@@ -53,13 +53,16 @@ def softmax(x):
     """Compute softmax values for each sets of scores in x."""
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum(axis=0)
-def evaluate_with_embeddings_svm(config: dict, support_set: dict,validation_set: dict,data_set: dict,  dataset: str):
+def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set: dict, data_set: dict, dataset: str):
     """
-    Evaluate a model on the specified dataset.
+    Evaluates an SVM model using precomputed embeddings on a specified dataset.
 
-    :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
-    :param test_loader: DataLoader for the test set.
+    Parameters:
+        config (dict): Dictionary containing parameters for the SVM model and evaluation process.
+        support_set (dict): Dictionary representing the training set.
+        validation_set (dict): Dictionary representing the validation set, used to assess performance during or after training.
+        data_set (dict): Dictionary containing the test dataset to evaluate performance.
+        dataset (str): Name of the dataset to be evaluated, used for logging or selecting specific configurations.
     """
 
     # Start code
@@ -77,72 +80,28 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict,validation_set:
         architecture_name = "dino"
     else:
         architecture_name = "uni"
-    if scale:
-        if scaler == "std":
-            scaler = StandardScaler()
-            scaler.fit(support_set["embeddings"])
-            support_set["embeddings"] = scaler.transform(support_set["embeddings"])
+    
+    if config['task'] == "multi-label, binary-class":
+        svm = LinearSVC(C=0.01, random_state=42)
+        clf = CalibratedClassifierCV(svm)
+        # Make it an Multilabel classifier
+        multilabel_classifier = MultiOutputClassifier(clf, n_jobs=-1)
 
-            validation_set["embeddings"] = scaler.transform(validation_set["embeddings"])
-
-            data_set["embeddings"] = scaler.transform(data_set["embeddings"])
-
-        else:
-            scaler = MinMaxScaler()
-            scaler.fit(support_set["embeddings"])
-            support_set["embeddings"] = scaler.transform(support_set["embeddings"])
-
-            validation_set["embeddings"] = scaler.transform(validation_set["embeddings"])
-
-            data_set["embeddings"] = scaler.transform(data_set["embeddings"])
-    if regression:
-        if config['task'] == "multi-label, binary-class":
-            svm = LinearSVC(C=0.01, random_state=42)
-            clf = CalibratedClassifierCV(svm)
-            # Make it an Multilabel classifier
-            multilabel_classifier = MultiOutputClassifier(clf, n_jobs=-1)
-
-            # Fit the data to the Multilabel classifier
-            ovr_classifier = multilabel_classifier.fit(support_set["embeddings"], support_set["labels"])
-        if config['task'] == "ordinal-regression":
-            svr = SVR(C=0.01,kernel="linear")
-            #clf = CalibratedClassifierCV(svr)
-            # Make it an Multilabel classifier
-
-            # Fit the data to the Multilabel classifier
-            ovr_classifier = svr.fit(support_set["embeddings"], support_set["labels"])
-        else:
-            svm = LinearSVC(C=0.001, random_state=42)
-            clf = CalibratedClassifierCV(svm)
-            # Make it an OvR classifier
-            ovr_classifier = OneVsRestClassifier(clf)
-
-            # Fit the data to the OvR classifier
-            ovr_classifier = ovr_classifier.fit(support_set["embeddings"], support_set["labels"])
+        # Fit the data to the Multilabel classifier
+        ovr_classifier = multilabel_classifier.fit(support_set["embeddings"], support_set["labels"])
+        filename = f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
+        pickle.dump(ovr_classifier, open(filename, 'wb'))
 
     else:
-        if config['task'] == "multi-label, binary-class":
-            svm = LinearSVC(C=0.01, random_state=42)
-            clf = CalibratedClassifierCV(svm)
-            # Make it an Multilabel classifier
-            multilabel_classifier = MultiOutputClassifier(clf, n_jobs=-1)
+        svm = LinearSVC(C=0.01, random_state=42)
+        clf = CalibratedClassifierCV(svm)
+        # Make it an OvR classifier
+        ovr_classifier = OneVsRestClassifier(clf)
 
-            # Fit the data to the Multilabel classifier
-            ovr_classifier = multilabel_classifier.fit(support_set["embeddings"], support_set["labels"])
-            filename = f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
-            pickle.dump(ovr_classifier, open(filename, 'wb'))
-
-        else:
-            svm = LinearSVC(C=0.01, random_state=42)
-            clf = CalibratedClassifierCV(svm)
-            # Make it an OvR classifier
-            ovr_classifier = OneVsRestClassifier(clf)
-
-            # Fit the data to the OvR classifier
-            ovr_classifier = ovr_classifier.fit(support_set["embeddings"], support_set["labels"])
-            filename =  f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
-            print(filename)
-            pickle.dump(ovr_classifier, open(filename, 'wb'))
+        # Fit the data to the OvR classifier
+        ovr_classifier = ovr_classifier.fit(support_set["embeddings"], support_set["labels"])
+        filename =  f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
+        pickle.dump(ovr_classifier, open(filename, 'wb'))
 
 
 
@@ -276,8 +235,7 @@ if __name__ == '__main__':
 
     for dataset in ['breastmnist', 'bloodmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist',
                 'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist', 'chestmnist']:
-    #for dataset in ['retinamnist']:
-    #for dataset in ['bloodmnist']:
+
         print(f"\t... for {dataset}...")
         df = pd.DataFrame(
         columns=["dataset", "img_size", "Acc_Test", "Acc_Val", "Acc_Train", "Bal_Acc", "Bal_Acc_Val", "Bal_Acc_Train",
@@ -299,7 +257,7 @@ if __name__ == '__main__':
 
             acc_train, acc_val, acc, bal_acc_train, bal_acc_val, bal_acc, auc_train, auc_val, auc, co_train, co_val, co = evaluate_with_embeddings_svm(
             config, data_train, data_validation, data_test,
-            dataset, scale=False, scaler="minmax", regression=False)
+            dataset)
             d = {'dataset': [dataset], 'img_size': img_size, "Acc_Test": [acc], "Acc_Val": [acc_val],
              "Acc_Train": [acc_train], "Bal_Acc": [bal_acc], "Bal_Acc_Val": [bal_acc_val],
              "Bal_Acc_Train": [bal_acc_train], "AUC": [auc], "AUC_Val": [auc_val], "AUC_Train": [auc_train], "CO": [co],
