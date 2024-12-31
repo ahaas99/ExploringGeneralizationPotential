@@ -210,7 +210,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             images = images.to(device)
 
             # set loss functions (has to be done each iteration, so per batch, as task will change)
-            #use a weighted loss if if config['weighted_loss']==True
+            # use a weighted loss if config['weighted_loss']==True
             if task_dict[random_dataset] == "multi-label, binary-class":
                 if config['weighted_loss']:
                     criterion = CustomBCEWithLogitsLoss().to(device)
@@ -323,6 +323,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
             for dataset_name, single_val_loader in loader_dict['val_loader_dict'].items():
                 # Swap Head for the Model
                 model.head = head_dict[dataset_name]
+                # use a weighted loss if config['weighted_loss']==True
                 if task_dict[dataset_name] == "multi-label, binary-class":
                     if config['weighted_loss']:
                         criterion = CustomBCEWithLogitsLoss().to(device)
