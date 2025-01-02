@@ -44,8 +44,7 @@ from PIL import Image
 import numpy as np
 import os
 from backbones import get_backbone
-sys.path.insert(0, '/accuracies/')
-sys.path.insert(0, '/models/')
+
 
 class DataFromDict(Dataset):
     def __init__(self, input_dict):
@@ -192,7 +191,6 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
         for images, labels in tqdm(test_loader):
             # Map the data to the available device
             images, labels = images.to(config['device']), labels.to(torch.float32).to(config['device'])
-            #print(labels)
 
             outputs = model(images)
             outputs = prediction(outputs)
