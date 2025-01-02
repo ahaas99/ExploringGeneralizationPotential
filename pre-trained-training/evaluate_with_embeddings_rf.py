@@ -224,16 +224,14 @@ if __name__ == '__main__':
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz
 
             data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
+            #Load the embeddings 
             data_train = data["arr_0"].item()["train"]
             data_validation = data["arr_0"].item()["val"]
             data_test = data["arr_0"].item()["test"]
             config["dataset"] = dataset
             config["img_size"] = img_size
-            # train_loader = DataLoader(data_train, batch_size=config['batch_size'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-            # test_loader = DataLoader(data_test, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-            # print(test_loader)
 
+             # train and evaluate the model  
             acc_train, acc_val, acc, bal_acc_train, bal_acc_val, bal_acc, auc_train, auc_val, auc, co_train, co_val, co = evaluate_with_embeddings_rf(
                 config, data_train, data_validation, data_test,
                 dataset)
@@ -242,6 +240,7 @@ if __name__ == '__main__':
                  "Bal_Acc_Train": [bal_acc_train], "AUC": [auc], "AUC_Val": [auc_val], "AUC_Train": [auc_train],
                  "CO": [co], "CO_Val": [co_val], "CO_Train": [co_train]}
 
+            #add the metrics and save them
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
