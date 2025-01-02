@@ -157,18 +157,6 @@ def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
 
 
 
@@ -177,7 +165,8 @@ def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
     model = model
-    filename = f"/mnt/data/modelsalex/models/{architecture_name}/rf/{config['dataset']}_{config['img_size']}.sav"
+    #Load the model
+    filename = f"{config["output_path"]}/{config["architecture_name"]}/rf/{config['dataset']}_{config['img_size']}.sav"
     try:
         with open(filename, 'rb') as model_file:
             ovr_classifier = pickle.load(model_file)
@@ -186,18 +175,7 @@ def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
         print(f"Model file not found: {filename}")
     except Exception as e:
         print(f"An error occurred while loading the model: {e}")
-    #print(filename)
-    #pickle.dump(ovr_classifier, open(filename, 'wb'))
-    #classifier = model.get_classifier()
-    #checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{architecture_name}_s{config['seed']}_best.pth"
-    #checkpoint = torch.load(checkpoint_file, map_location='cpu')
-    #classifier.load_state_dict(checkpoint)
-    #model.head = classifier
 
-
-
-    #model.head = classifier
-    print(ovr_classifier)
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
@@ -212,12 +190,13 @@ def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
          for images, labels in tqdm(test_loader):
                 # Map the data to the available device
                 images, labels = images.to(config['device']), labels.to(torch.float32).to(config['device'])
-
+                #get the embeddings of the model
                 output = model.forward_features(images)
                 output = model.forward_head(output, pre_logits=True)
                 output = output.reshape(output.shape[0], -1)
                 embeddings_db.append(deepcopy(output.cpu().numpy()))
     all_outputs = np.concatenate(embeddings_db, axis=0)
+    #predict with the model by feeding the embeddings into it
     y_pred = ovr_classifier.predict(all_outputs)
     y_pred_per = ovr_classifier.predict_proba(all_outputs)
 
@@ -374,19 +353,9 @@ if __name__ == '__main__':
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
-            #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
+          
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
+           
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
             corruptions = CORRUPTIONS_DS[dataset]
@@ -440,11 +409,8 @@ if __name__ == '__main__':
                     y_pred, y_pred_per = evaluate(config,dataset=dataset,test_loader=test_loader, model=model)
                     y_true = test_dataset.labels
                     for severity in range(5):
-                        # get probabilities of the current severity slice
-                        index_range = slice(len(y_true) * severity, y_true * (severity + 1))
-                        # calculate relative score and update evaluation metric
                         index_range = slice(len(y_true) * severity, len(y_true) * (severity + 1))
-                        # calculate relative score and update evaluation metri
+                        # calculate relative score and update evaluation metric
                         acc = get_ACC_kNN(y_true, y_pred[index_range], config['task'])
                         if dataset=="chestmnist":
                             y_pred_per = np.array(y_pred_per)
@@ -463,8 +429,6 @@ if __name__ == '__main__':
                         # so skip if true
 
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/rf/corrupted/{img_size}/{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{config["architecture_name"]}/rf/corrupted/{img_size}/{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
