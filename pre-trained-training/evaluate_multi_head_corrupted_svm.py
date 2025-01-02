@@ -157,20 +157,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
-
-
 
     task_string = INFO[dataset]['task']
 
@@ -200,6 +186,8 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     model.requires_grad_(False)
     model.eval()
     y_pred, y_pred_per = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
+    
+    #Get the embeddings and evaluate the model
     embeddings_db = []
     with torch.no_grad():
          for images, labels in tqdm(test_loader):
