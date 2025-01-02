@@ -158,26 +158,12 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
-
-
 
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model, num_features = get_backbone(backbone_name=architecture_name, architecture=architecture, num_classes=1000,
+    model, num_features = get_backbone(backbone_name=config["architecture_name"], architecture=config["architecture"], num_classes=1000,
                                           pretrained=True)
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_backbone_best.pth", map_location='cpu')
