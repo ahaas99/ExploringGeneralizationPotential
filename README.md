@@ -54,10 +54,22 @@ Cited sources:
 Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
 Di Salvo, F., Doerrich, S., & Ledig, C. (2024). MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions. ArXiv, abs/2406.17536.
 
-##Website
+## Website
 
 A deeper description for the Website can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis) from Marius Ludwig Bachmeier, who programmed the core structure of the Website. 
-Changes to the Website were made to make it possible to evaluate and compare models on the MedMNIST-C dataset from Di Salvo et al. (2024).
+Changes to the Website(front- and backend) and the database were made to make it possible to evaluate and compare models also on the MedMNIST-C dataset from Di Salvo et al. (2024).
+
+![Homescree](images/WebsiteHomescreen.PNG)
+The homescreen displays a leaderboard excerpt for the challenge, provides a brief description of the benchmark, and includes navigation to key pages.
+
+![Leaderboard](images/WebsiteLeaderboard.PNG)
+
+
+The leaderboard page displays an overview of the top 10 submissions, filtered by an evaluation metric and the image resolution used during training. Data is retrieved from the database and passed from the back end to the front end for display.
+
+An additional filter, highlighted with a red border, allows users to select the dataset (MedMNIST+ or MedMNIST-C). This functionality is consistent across the website, enabling dataset selection in various sections, such as the dataset explanations and the submission upload page, where users must specify the dataset for which they are submitting metrics.
+
+
 
 
 
