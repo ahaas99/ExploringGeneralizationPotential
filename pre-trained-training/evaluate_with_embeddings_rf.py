@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script evaluates a model on all datasets of the MedMNIST+ collection.
+The script trains and evaluates a model on all datasets of the MedMNIST+ collection.
 """
 
 # Import packages
@@ -90,6 +90,7 @@ def evaluate_with_embeddings_rf(config: dict, support_set: dict, validation_set:
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
 
     with torch.no_grad():
+        #evaluate the model on train, validation and test split
         outputs_train = ovr_classifier.predict(support_set["embeddings"])
         true_prediction_train = support_set["labels"]
         outputs_train = np.asarray(outputs_train)
