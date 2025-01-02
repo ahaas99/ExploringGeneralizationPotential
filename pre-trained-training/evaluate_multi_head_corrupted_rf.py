@@ -163,8 +163,6 @@ def evaluate(config: dict, dataset ,test_loader: DataLoader, model):
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
-    print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model = model
     #Load the model
     filename = f"{config["output_path"]}/{config["architecture_name"]}/rf/{config['dataset']}_{config['img_size']}.sav"
     try:
