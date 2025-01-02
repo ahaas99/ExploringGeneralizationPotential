@@ -90,7 +90,6 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
         filename = f"{config["output_path"]}/{config["architecture_name"]}{architecture_name}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
         pickle.dump(ovr_classifier, open(filename, 'wb'))
     else:
-        #gbc = LGBMClassifier(max_depth=7, num_leaves=100)
         gbc = LGBMClassifier(
             max_depth=5,
             num_leaves=31,
@@ -106,7 +105,6 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
             bagging_freq=1
         )
 
-        # Make it an OvR classifier
 
 
         # Fit the data to the OvR classifier
@@ -240,7 +238,7 @@ if __name__ == '__main__':
     np.random.seed(config['seed'])
     g = torch.Generator()
     g.manual_seed(config['seed'])
-
+     # iterate over every dataset
     for dataset in ['breastmnist','bloodmnist',  'dermamnist', 'octmnist', 'organamnist', 'organcmnist',
                     'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist', 'chestmnist']:
         # for dataset in ['bloodmnist']:
@@ -252,7 +250,7 @@ if __name__ == '__main__':
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_embeddings.npz"
             else:
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
-
+            #Load the embeddings 
             data = np.load(filename, allow_pickle=True)
             # data["arr_0"].item()["train"]["embeddings"]
             data_train = data["arr_0"].item()["train"]
@@ -260,15 +258,12 @@ if __name__ == '__main__':
             data_test = data["arr_0"].item()["test"]
             config["dataset"] = dataset
             config["img_size"] = img_size
-            # train_loader = DataLoader(data_train, batch_size=config['batch_size'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-            # test_loader = DataLoader(data_test, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-            # print(test_loader)
-
+             # train and evaluate the model  
             acc_train, acc_val, acc, bal_acc_train, bal_acc_val, bal_acc, auc_train, auc_val, auc, co_train, co_val, co = evaluate_with_embeddings_lightgbm(config, data_train, data_validation, data_test,
                                                                    dataset)
             d = {'dataset': [dataset], 'img_size': img_size, "Acc_Test": [acc], "Acc_Val": [acc_val],
                  "Acc_Train": [acc_train], "Bal_Acc":[bal_acc], "Bal_Acc_Val":[bal_acc_val], "Bal_Acc_Train":[bal_acc_train], "AUC":[auc], "AUC_Val":[auc_val], "AUC_Train":[auc_train],"CO":[co], "CO_Val":[co_val], "CO_Train":[co_train]}
-
+            #add the metrics and save them
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
@@ -283,6 +278,4 @@ if __name__ == '__main__':
 
 
 
-
-    # Run the training
-    #evaluate(config, train_loader, test_loader)
+)
