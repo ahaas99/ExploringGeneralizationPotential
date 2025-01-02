@@ -141,10 +141,7 @@ def main(data_path:str, output_path: str, batch_size: int = 256, device: str = '
                     transforms.Normalize(mean=mean, std=std),
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0, padding_mode='constant') # Pad the image to 224x224
                 ])
-                #data_transform = transforms.Compose([
-                #    transforms.ToTensor(),
-                #    transforms.Normalize(mean=mean, std=std)
-                #])
+
 
                 # Create the datasets
                 train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True, size=img_size)
