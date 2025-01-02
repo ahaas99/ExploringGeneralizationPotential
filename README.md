@@ -7,11 +7,11 @@ This file shows how a .csv in the right format, that is needed for the submissio
 The submiossions have 4 columns: 
 - **`dataset_name`**: Name of the dataset + the applied corruption + severity. So for bloodMNIST, corruption "pixelate" and severity 0, the dataset_name column would be: "bloodmnistpixealte0".
 - **`prediction`**: The predicted value for one image
-- **`truth`**: The true value of one image
-- **`probability`**: The probabilis of all classes
+- **`truth`**: The true value of the image
+- **`probability`**: The probabilis of all classes of the image
 
   
-The same for MedMNIST+ can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
+The same for submissions for MedMNIST+ can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
 
 ## Code Structure for mm-PT
 The interaction between the code files in the mm-PT directory is structured to ensure modularity and clarity. While most files are interdependent, an essential separation exists between training and testing processes. During training, the focus is on producing training metrics and validation metrics for the models. Notably, no evaluation on the test set is conducted during this phase. The best model and the corresponding heads are saved for evaluation later.
