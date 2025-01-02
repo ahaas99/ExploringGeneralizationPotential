@@ -13,8 +13,6 @@ def get_backbone(backbone_name: str, architecture: str, num_classes: int, pretra
             return backbone, num_features
 
         case 'dino':
-            print(backbone_name)
-            print(architecture)
             backbone = timm.create_model(architecture, pretrained=pretrained, num_classes=num_classes)
             num_features = backbone.get_classifier().in_features
             return backbone, num_features
