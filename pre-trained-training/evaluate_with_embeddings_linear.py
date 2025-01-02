@@ -146,6 +146,8 @@ def evaluate(config: dict, train_loader: DataLoader, val_loader:DataLoader,test_
     print("\tElapsed time for evaluation: {:0>2}:{:0>2}:{:05.2f}".format(hours, minutes, seconds))
     return ACC_Train, ACC_Val, ACC_Test, Bal_Acc_Train, Bal_Acc_Val, Bal_Acc_Test, AUC_Train, AUC_Val, AUC_Test, Co_Train, Co_Val, Co_Test, Prec_Train, Prec_Val, Prec_Test
 
+if __name__ == '__main__':
+    # Read out the command line parameters.
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file", required=True, type=str, help="Path to the configuration file to use.")
     parser.add_argument("--dataset", required=False, type=str, help="Which dataset to use.")
