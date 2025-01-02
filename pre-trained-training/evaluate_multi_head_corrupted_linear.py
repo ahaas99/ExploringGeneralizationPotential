@@ -42,8 +42,6 @@ from torchvision import transforms
 from torch.utils.data import Dataset
 from PIL import Image
 
-sys.path.insert(0, '/accuracies/')
-sys.path.insert(0, '/models/')
 class CorruptedMedMNIST(Dataset):
     def __init__(self,
                  dataset_name: str,
@@ -159,14 +157,10 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-
-
-
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model = model
 
     classifier = model.get_classifier()
     checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{architecture_name}_s{config['seed']}_best.pth"
@@ -176,8 +170,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
 
 
 
-    #model.head = classifier
-    print(model.head)
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
@@ -186,7 +178,7 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     model = model.to(config['device'])
     model.requires_grad_(False)
     model.eval()
-
+    #evaluate the model
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
     with torch.no_grad():
         for images, labels in tqdm(test_loader):
