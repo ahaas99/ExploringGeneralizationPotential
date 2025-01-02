@@ -149,7 +149,7 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
     Evaluate a model on the specified dataset.
 
     :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
+    :param dataset: Dataset used
     :param test_loader: DataLoader for the test set.
     """
 
@@ -271,7 +271,9 @@ if __name__ == '__main__':
     np.random.seed(config['seed'])
     g = torch.Generator()
     g.manual_seed(config['seed'])
+    #create datafame where values are stored once initially
     df = pd.DataFrame(columns=["dataset_name", "prediction", "truth", "probability"])
+    #Iterate over the datasets
     for dataset in ['breastmnist', 'bloodmnist', 'chestmnist','dermamnist', 'octmnist', 'organamnist', 'organcmnist',
                     'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist']:
 
@@ -280,8 +282,8 @@ if __name__ == '__main__':
         info = INFO[dataset]
         task, in_channel, num_classes = info['task'], info['n_channels'], len(info['label'])
         DataClass = getattr(medmnist, info['python_class'])
-        # Iterate over all image sizes
-        for img_size in [28, 64, 128, 224]:
+        # Do only for the biggest images
+        for img_size in [224]:
 
             # Extract the dataset and its metadata
             info = INFO[dataset]
@@ -451,16 +453,22 @@ if __name__ == '__main__':
                         index_range = slice(len(y_true) * severity, len(y_true) * (severity + 1))
                         # calculate relative score and update evaluation metric
                         data_list = []  # List to collect data for the DataFrame
+                        if config['task'] == 'multi-label, binary-class':
+                            # obtain predicted labels, using 0.5 as threshold due to binary classification
+                            predictions = (y_pred > 0.5).int()
 
-                        for x, y in zip(y_true, y_pred.cpu().numpy()[index_range]):
-                            y_array = np.array(y)  # Ensure `y` is an array
-                            d = {
-                                'dataset_name': f"{dataset}{corruption}{severity}",
-                                'prediction': y_array,
-                                'truth': x,
-                                'probability': y_array,  # Assuming `y` represents probability
-                            }
-                            data_list.append(d)
+                        else:
+                            # obtain predicted labels, using argmax for the label with the highest probability
+                            predictions = torch.argmax(y_pred, dim=1)
+                        config['task']
+                        for x, y, z in zip(y_true, y_pred[index_range], predictions[index_range]):
+                                d = {
+                                    'dataset_name': f"{dataset}{corruption}{severity}",
+                                    'prediction': z.cpu().numpy().tolist(),
+                                    'truth': x.tolist(),
+                                    'probability': y.cpu().numpy().tolist(),  # Assuming `y` represents probability
+                                }
+                                data_list.append(d)
 
                         # Create a DataFrame outside the loop 
                         dfsupport = pd.DataFrame(data_list)
