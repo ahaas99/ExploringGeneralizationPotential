@@ -183,9 +183,9 @@ if __name__ == '__main__':
     # Read out the command line parameters.
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path", required=False, type=str, default="", help="Path to the MedMNIST+ dataset.")
-    parser.add_argument("--output_path", required=False, type=str, default='/mnt/data/embeddingsalex/embeddings/uni/',  help="Path to the output folder.")
+    parser.add_argument("--output_path_embeddings", required=False, type=str, help="Path to the output folder.")
     parser.add_argument("--batch_size", required=False, type=int, default=256, help="Which dataset to use.")
     parser.add_argument("--device", required=False, type=str, default='cuda:0', help="Which image size to use.")
 
     args = parser.parse_args()
-    main(data_path=args.data_path, output_path=args.output_path, batch_size=args.batch_size, device=args.device)
+    main(data_path=args.data_path, output_path=args.output_path_embeddings, batch_size=args.batch_size, device=args.device)
