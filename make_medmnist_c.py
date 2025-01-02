@@ -198,6 +198,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     
-    ds_manager = DatasetManager(medmnist_path=args.medmnist_path, output_path=args.medmnist_path)
+    ds_manager = DatasetManager(medmnist_path=args.medmnist_path, output_path=args.medmnistc_path)
     ds_manager.create_dataset(dataset_name="all", size=args.size)
 
