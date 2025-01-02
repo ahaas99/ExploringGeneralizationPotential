@@ -68,6 +68,8 @@ def evaluate_with_embeddings_rf(config: dict, support_set: dict, validation_set:
     info = INFO[dataset]
     config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
 
+
+    #Create the classifier
     rf = RandomForestClassifier(
         max_depth=7,
         n_estimators=50,
@@ -76,20 +78,10 @@ def evaluate_with_embeddings_rf(config: dict, support_set: dict, validation_set:
     )
 
 
-    # Make it an OvR classifier
 
-    architecture_name = ""
-    if config['architecture'] == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif config['architecture'] == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif config['architecture'] == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    else:
-        architecture_name = "uni"
     # Fit the data to the OvR classifier
     ovr_classifier = rf.fit(support_set["embeddings"], support_set["labels"])
-    filename = f"/mnt/data/modelsalex/models/{architecture_name}/rf/{config['dataset']}_{config['img_size']}.sav"
+    filename = f"{config["output_path"]}/{config["architecture_name"]}/rf/{config['dataset']}_{config['img_size']}.sav"
     pickle.dump(ovr_classifier, open(filename, 'wb'))
 
 
