@@ -58,74 +58,45 @@ def evaluate_with_embeddings(config: dict, support_set: dict, data_set: dict, k:
     # Extract the dataset and its metadata
     info = INFO[dataset]
     config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
-    architecture_name = ""
-    if config['architecture'] == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif config['architecture'] == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif config['architecture'] == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    else:
-        architecture_name = "uni"
-    if config['training_procedure'] == 'kNN':
 
-        nbrs = NearestNeighbors(n_neighbors=k, algorithm='ball_tree').fit(support_set['embeddings'])
-        filename = f"/mnt/data/modelsalex/models/{architecture_name}/knn/{config['dataset']}_{config['img_size']}.sav"
-        pickle.dump(nbrs, open(filename, 'wb'))
+    nbrs = NearestNeighbors(n_neighbors=k, algorithm='ball_tree').fit(support_set['embeddings'])
+    filename = f"{config["output_path"]}/{config["architecture_name"]}/knn/{config['dataset']}_{config['img_size']}.sav"
+    pickle.dump(nbrs, open(filename, 'wb'))
     # Run the Evaluation
     print(f"\tRun the evaluation ...")
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
 
     with torch.no_grad():
         for x in range(len(data_set["embeddings"])):
-    #   Map the data to the available device
-            #images, labels = images.to(config['device']), labels.to(torch.float32).to(config['device'])
 
-            if config['training_procedure'] == 'kNN':
-                outputs = data_set["embeddings"][x]
-                outputs = outputs.reshape(1, -1)
-                #outputs = outputs.detach().cpu().numpy()
-                outputs = knn_majority_vote(nbrs, outputs, support_set['labels'], config['task'])
-                outputs = outputs.to(config['device'])
+    
+            outputs = data_set["embeddings"][x]
+            outputs = outputs.reshape(1, -1)
+          
+            outputs = knn_majority_vote(nbrs, outputs, support_set['labels'], config['task'])
+            outputs = outputs.to(config['device'])
 
-            if config['task'] == "multi-label, binary-class":
-                #print(np.array(data_set["labels"][x]))
-                true_prediction = torch.from_numpy(np.array(data_set["labels"][x]))
-            else:
-                true_prediction = torch.from_numpy(np.array(data_set["labels"][x]))
+            
+            true_prediction = torch.from_numpy(np.array(data_set["labels"][x]))
             true_prediction = true_prediction.reshape(true_prediction.shape[0], -1)
             true_prediction = true_prediction.to(config['device'])
             y_true = torch.cat((y_true, deepcopy(true_prediction)), 0)
             y_pred = torch.cat((y_pred, deepcopy(outputs)), 0)
-        #for embeddings, labels in tqdm(test_loader):
-            # Map the data to the available device
-            #embeddings, labels = embeddings.to(config['device']), labels.to(torch.float32).to(config['device'])
-            #outputs = embeddings.reshape(embeddings.shape[0], -1)
-            #outputs = outputs.detach().cpu().numpy()
-            #outputs = knn_majority_vote(nbrs, outputs, support_set['labels'], config['task'])
-            #outputs = outputs.to(config['device'])
+          
 
 
 
-             #Store the labels and predictions
-            #y_true = torch.cat((y_true, deepcopy(labels)), 0)
-           # y_pred = torch.cat((y_pred, deepcopy(outputs)), 0)
-        # Calculate the metrics
-        if config['training_procedure'] == 'kNN':
+
             if config['task'] == "multi-label, binary-class":
                 y_true = y_true.reshape(22433, -1)
-            ACC = get_ACC_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-            AUC = 0.0  # AUC cannot be calculated for the kNN approach
-            Bal_Acc = get_Balanced_ACC_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-            Co = get_Cohen_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])  # AUC cannot be calculated for the kNN approach
+        ACC = get_ACC_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
+        AUC = 0.0  # AUC cannot be calculated for the kNN approach
+        Bal_Acc = get_Balanced_ACC_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
+        Co = get_Cohen_kNN(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])  # AUC cannot be calculated for the kNN approach
 
-        else:
-            ACC = get_ACC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
-            AUC = get_AUC(y_true.cpu().numpy(), y_pred.cpu().numpy(), config['task'])
 
-        # Print the loss values and send them to wandb
-        print(f"\t\t\tACC: {ACC}")
-        print(f"\t\t\tAUC: {AUC}")
+
+
         return ACC,Bal_Acc,Co
 
     print(f"\tFinished evaluation.")
@@ -234,8 +205,8 @@ if __name__ == '__main__':
            # print(test_loader)
             acc = 0
             anzahlk = 5
-            k = 11
-            acc, bal_acc, co = evaluate_with_embeddings(config, data_train, data_test, k, dataset)
+
+            acc, bal_acc, co = evaluate_with_embeddings(config, data_train, data_test, config["k"], dataset)
             d = {'dataset': [dataset], 'img_size': img_size, "Acc":[acc], "Bal_Acc": bal_acc, "Co":co}
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
