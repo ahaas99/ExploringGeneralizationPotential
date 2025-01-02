@@ -4,7 +4,7 @@ Chair of Explainable Machine Learning
 Otto-Friedrich University of Bamberg
 
 @description:
-The script evaluates a model on all datasets of the MedMNIST+ collection.
+The script trains and evaluates a model on all datasets of the MedMNIST+ collection.
 """
 
 # Import packages
@@ -66,17 +66,8 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
     # Extract the dataset and its metadata
     info = INFO[dataset]
     config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
-    architecture_name = ""
-    if config['architecture'] == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif config['architecture'] == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif config['architecture'] == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    else:
-        architecture_name = "uni"
+    
     if config['task'] == "multi-label, binary-class":
-        #gbc = LGBMClassifier(max_depth=7, num_leaves=100)
         gbc = LGBMClassifier(
             max_depth=5,
             num_leaves=31,
@@ -96,7 +87,7 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
 
         # Fit the data to the Multilabel classifier
         ovr_classifier = multilabel_classifier.fit(support_set["embeddings"], support_set["labels"])
-        filename = f"/mnt/data/modelsalex/models/{architecture_name}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
+        filename = f"{config["output_path"]}/{config["architecture_name"]}{architecture_name}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
         pickle.dump(ovr_classifier, open(filename, 'wb'))
     else:
         #gbc = LGBMClassifier(max_depth=7, num_leaves=100)
@@ -120,7 +111,7 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
 
         # Fit the data to the OvR classifier
         ovr_classifier = gbc.fit(support_set["embeddings"], support_set["labels"])
-        filename = f"/mnt/data/modelsalex/models/{architecture_name}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
+        filename = f"{config["output_path"]}/{config["architecture_name"]}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
         pickle.dump(ovr_classifier, open(filename, 'wb'))
 
 
@@ -130,6 +121,7 @@ def evaluate_with_embeddings_lightgbm(config: dict, support_set: dict, validatio
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
 
     with torch.no_grad():
+        #evaluate the model on train, validation and test split
         outputs_train = ovr_classifier.predict(support_set["embeddings"])
         true_prediction_train = support_set["labels"]
         outputs_train = np.asarray(outputs_train)
