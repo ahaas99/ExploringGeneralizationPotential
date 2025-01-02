@@ -112,7 +112,6 @@ if __name__ == '__main__':
     parser.add_argument("--config_file", required=True, type=str, help="Path to the configuration file to use.")
     parser.add_argument("--dataset", required=False, type=str, help="Which dataset to use.")
     parser.add_argument("--img_size", required=False, type=int, help="Which image size to use.")
-    parser.add_argument("--training_procedure", required=False, type=str, help="Which training procedure to use.")
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
@@ -179,10 +178,10 @@ if __name__ == '__main__':
     g = torch.Generator()
     g.manual_seed(config['seed'])
 
-
-    #for dataset in ['bloodmnist', 'breastmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist',
-    #            'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist', 'chestmnist']:
-    for dataset in ['chestmnist']:
+    # iterate over the whole dataset
+    for dataset in ['bloodmnist', 'breastmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist',
+                'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist', 'chestmnist']:
+    
         print(f"\t... for {dataset}...")
         df = pd.DataFrame(columns=["dataset", "img_size", "Acc", "Bal_Acc", "Co"])
         for img_size in [28, 64, 128, 224]:
@@ -193,35 +192,22 @@ if __name__ == '__main__':
             else:
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
 
-
+            #Load the embeddings
             data = np.load(filename, allow_pickle=True)
-            #data["arr_0"].item()["train"]["embeddings"]
+          
             data_train = data["arr_0"].item()["train"]
             data_test = data["arr_0"].item()["test"]
             config["dataset"] = dataset
             config["img_size"] = img_size
-            #train_loader = DataLoader(data_train, batch_size=config['batch_size'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-            #test_loader = DataLoader(data_test, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4, worker_init_fn=seed_worker, generator=g)
-           # print(test_loader)
-            acc = 0
-            anzahlk = 5
 
+            #train the kNN and evaluate it
             acc, bal_acc, co = evaluate_with_embeddings(config, data_train, data_test, config["k"], dataset)
+            
             d = {'dataset': [dataset], 'img_size': img_size, "Acc":[acc], "Bal_Acc": bal_acc, "Co":co}
+            #add the metrics and save them      
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
             filename = Path(config["output_path_acc") / f"{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
-            print(f"Best = {acc}, Knoten = {anzahlk}")
-
-
-
-
-
-
-
-
-    # Run the training
-    #evaluate(config, train_loader, test_loader)
