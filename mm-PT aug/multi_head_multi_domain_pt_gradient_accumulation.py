@@ -91,7 +91,7 @@ def multi_head_multi_domain_training_gradient_accumulation(config: dict, loader_
 
     # Get lengths of training dataloaders
     for dataset_name, train_loader in loader_dict['train_loader_dict'].items():
-        # Cap the lengths of every Dataloader to the smallest(breastmnist)
+        #cap the length of the dataloader to the instances of breastmnist, which has the least data. This makes sure every dataset get´s seen the same while training
         loader_len_train[dataset_name] = len(loader_dict['train_loader_dict']["breastmnist"]) 
         sum_loader_length_train += len(loader_dict['train_loader_dict']["breastmnist"])
     # Compute initial probabilities of picking dataloader to get a batch from
