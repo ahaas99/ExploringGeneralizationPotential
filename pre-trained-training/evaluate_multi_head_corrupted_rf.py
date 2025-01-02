@@ -214,7 +214,6 @@ if __name__ == '__main__':
     parser.add_argument("--config_file", required=True, type=str, help="Path to the configuration file to use.")
     parser.add_argument("--dataset", required=False, type=str, help="Which dataset to use.")
     parser.add_argument("--img_size", required=False, type=int, help="Which image size to use.")
-    parser.add_argument("--training_procedure", required=False, type=str, help="Which training procedure to use.")
     parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--k", required=False, type=int, help="Number of nearest neighbors to use.")
     parser.add_argument("--seed", required=False, type=int, help="Which seed was used during training.")
@@ -238,8 +237,6 @@ if __name__ == '__main__':
     if args.img_size:
         config['img_size'] = args.img_size
 
-    if args.training_procedure:
-        config['training_procedure'] = args.training_procedure
 
     if args.architecture:
         config['architecture'] = args.architecture
