@@ -66,18 +66,11 @@ def evaluate(config: dict, train_loader: DataLoader, val_loader:DataLoader,test_
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    else:
+
         architecture_name = "uni"
     #Train only the head of the model
     model = model.get_classifier()
-    checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{architecture_name}_s{config['seed']}_best.pth"
+    checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{config["architecture_name"]}_s{config['seed']}_best.pth"
     checkpoint = torch.load(checkpoint_file, map_location='cpu')
     model.load_state_dict(checkpoint)
     if config['task'] == "multi-label, binary-class":
@@ -94,7 +87,6 @@ def evaluate(config: dict, train_loader: DataLoader, val_loader:DataLoader,test_
         for images, labels in tqdm(train_loader):
             # Map the data to the available device
             images, labels = images.to(config['device']), labels.to(torch.float32).to(config['device'])
-            print(labels)
 
             outputs = model(images)
             outputs = prediction(outputs)
@@ -226,7 +218,7 @@ if __name__ == '__main__':
     np.random.seed(config['seed'])
     g = torch.Generator()
     g.manual_seed(config['seed'])
-
+    # iterate over every dataset
     for dataset in ['breastmnist', 'bloodmnist', 'chestmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist',
                     'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist']:
 
@@ -244,7 +236,6 @@ if __name__ == '__main__':
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
             architecture = config["architecture"]
             print(f"\t\t\t ... for {architecture}...")
             access_token = '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'
@@ -264,19 +255,12 @@ if __name__ == '__main__':
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
 
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            else:
-                architecture_name = "uni"
+        
             if img_size == 28:
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_embeddings.npz"
             else:
                 filename = Path(config["output_path_embeddings"]) / f"{dataset}_{img_size}_embeddings.npz"
+            #Load the embeddings   
             data = np.load(filename, allow_pickle=True)
             # data["arr_0"].item()["train"]["embeddings"]
             data_train = data["arr_0"].item()["train"]
@@ -288,7 +272,7 @@ if __name__ == '__main__':
             test_data = DataFromDict(data_test)
 
             # Create the dataloaders
-            # print(data_train)
+            
             train_loader = DataLoader(train_data, batch_size=config['batch_size'], shuffle=True, num_workers=4,
                                       worker_init_fn=seed_worker, generator=g)
             val_loader = DataLoader(val_data, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
@@ -299,17 +283,18 @@ if __name__ == '__main__':
             config["dataset"] = dataset
             config["img_size"] = img_size
             config["architecture"] = architecture
+            # train and evaluate the model
             acc_train, acc_val, acc, bal_acc_train, bal_acc_val, bal_acc, auc_train, auc_val, auc, co_train, co_val, co, prec_train, prec_val, prec = evaluate(config, train_loader, val_loader, test_loader, model)
             d = {'dataset': [dataset], 'img_size': img_size, "Acc_Test": [acc], "Acc_Val": [acc_val],
                  "Acc_Train": [acc_train], "Bal_Acc": [bal_acc], "Bal_Acc_Val": [bal_acc_val],
                  "Bal_Acc_Train": [bal_acc_train], "AUC": [auc], "AUC_Val": [auc_val], "AUC_Train": [auc_train],
                  "CO": [co], "CO_Val": [co_val], "CO_Train": [co_train],"Prec": [prec], "Prec_Val":[prec_val], "Prec_Train":[prec_train] }
 
+            #add the metrics and save them  
             dfsupport = pd.DataFrame(data=d)
             df = pd.concat([df, dfsupport])
 
             filename = Path(config["output_path_acc"]) / f"{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
+    
