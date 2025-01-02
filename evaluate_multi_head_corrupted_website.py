@@ -302,14 +302,13 @@ if __name__ == '__main__':
         task, in_channel, num_classes = info['task'], info['n_channels'], len(info['label'])
         DataClass = getattr(medmnist, info['python_class'])
         # Iterate over all image sizes
-        for img_size in [224]:
+        for img_size in [28, 64, 128, 224]:
 
             # Extract the dataset and its metadata
             info = INFO[dataset]
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
             architecture = config["architecture"]
             print(f"\t\t\t ... for {architecture}...")
             access_token = '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'
@@ -330,24 +329,7 @@ if __name__ == '__main__':
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
             # Create the data transforms and normalize with imagenet statistics
 
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            elif architecture == "alexnet":
-                architecture_name = "alexnet"
-            else:
-                architecture_name = "uni"
 
-            #print(filename)
-            #data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
-            #data_train = data["arr_0"].item()["train"]
-            #data_val = data["arr_0"].item()["val"]
-            #data_test = data["arr_0"].item()["val"]
             if architecture == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
@@ -366,19 +348,9 @@ if __name__ == '__main__':
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
-            #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
+           
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
+           
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
             config["dataset"] = dataset
@@ -465,9 +437,6 @@ if __name__ == '__main__':
                     config["dataset"] = dataset
                     config["img_size"] = img_size
                     config["architecture"] = architecture
-                    print(corruption)
-                    print(total_padding)
-                    print(img_size)
                     if img_size!=224:
                     # Load the corrupted test set, according to the selected corruption
                         corrupted_test_test = CorruptedMedMNIST(
@@ -514,14 +483,12 @@ if __name__ == '__main__':
                             }
                             data_list.append(d)
 
-                        # Create a DataFrame outside the loop
+                        # Create a DataFrame outside the loop 
                         dfsupport = pd.DataFrame(data_list)
+                        #df saves all datasets and corruptions into one dataframe that gets saved later 
                         df = pd.concat([df, dfsupport])
-            # If the size of the images is 28 and its either bubbly, stain_deposit or characters the corruption doesnt exist,
-            # so skip if true
+            
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/head/corrupted/{img_size}/combineddataset.csv"
+            filename = Path(config["output_path_acc"]) / f"{config["architecture_name"]}/head/corrupted/{img_size}/combineddataset.csv"
 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
