@@ -71,18 +71,12 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set
     # Extract the dataset and its metadata
     info = INFO[dataset]
     config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
-    architecture_name = ""
-    if config['architecture'] == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif config['architecture'] == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif config['architecture'] == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    else:
-        architecture_name = "uni"
+    
     
     if config['task'] == "multi-label, binary-class":
+        #Create the classifier
         svm = LinearSVC(C=0.01, random_state=42)
+        #Make it a clibrated classifier(to enable probability output)
         clf = CalibratedClassifierCV(svm)
         # Make it an Multilabel classifier
         multilabel_classifier = MultiOutputClassifier(clf, n_jobs=-1)
@@ -112,6 +106,7 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set
     with torch.no_grad():
       
         #evaluate the model on traing, validation and test split
+      
         outputs_train = ovr_classifier.predict(support_set["embeddings"])
         true_prediction_train = support_set["labels"]
         outputs_train = np.asarray(outputs_train)
