@@ -174,10 +174,8 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
     checkpoint_file = f"{config['output_path']}/{config['architecture_name']}/{config['img_size']}/s{config['seed']}"
     checkpoint = torch.load(f"{checkpoint_file}_{dataset}_best.pth", map_location='cpu')
     classifier.load_state_dict(checkpoint)  # , strict=False)
-    print(model.head)
 
     model.head = classifier
-    print(model.head)
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
@@ -192,7 +190,6 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
         for images, labels in tqdm(test_loader):
             # Map the data to the available device
             images, labels = images.to(config['device']), labels.to(torch.float32).to(config['device'])
-            #print(labels)
 
             outputs = model(images)
             outputs = prediction(outputs)
@@ -322,7 +319,6 @@ if __name__ == '__main__':
                 total_padding = max(0, 224 - img_size)
             padding_left, padding_top = total_padding // 2, total_padding // 2
             padding_right, padding_bottom = total_padding - padding_left, total_padding - padding_top
-            print(total_padding)
             data_transform = transforms.Compose([
                     transforms.ToTensor(),
                     transforms.Normalize(mean=mean, std=std),
