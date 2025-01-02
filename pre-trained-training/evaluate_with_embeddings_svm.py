@@ -89,7 +89,7 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set
 
         # Fit the data to the Multilabel classifier
         ovr_classifier = multilabel_classifier.fit(support_set["embeddings"], support_set["labels"])
-        filename = f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
+        filename = f"{config["output_path"]}/{config["architecture_name"]}/svm/{config['dataset']}_{config['img_size']}.sav"
         pickle.dump(ovr_classifier, open(filename, 'wb'))
 
     else:
@@ -100,7 +100,7 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set
 
         # Fit the data to the OvR classifier
         ovr_classifier = ovr_classifier.fit(support_set["embeddings"], support_set["labels"])
-        filename =  f"/mnt/data/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
+        filename =  f"{config["output_path"]}/{config["architecture_name"]}/svm/{config['dataset']}_{config['img_size']}.sav"
         pickle.dump(ovr_classifier, open(filename, 'wb'))
 
 
@@ -110,7 +110,8 @@ def evaluate_with_embeddings_svm(config: dict, support_set: dict, validation_set
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
 
     with torch.no_grad():
-
+      
+        #evaluate the model on traing, validation and test split
         outputs_train = ovr_classifier.predict(support_set["embeddings"])
         true_prediction_train = support_set["labels"]
         outputs_train = np.asarray(outputs_train)
