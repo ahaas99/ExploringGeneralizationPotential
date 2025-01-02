@@ -177,7 +177,7 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     num_classes = len(INFO[dataset]['label'])
     print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
     model = model
-    filename = f"/mnt/data/new/modelsalex/models/{architecture_name}/svm/{config['dataset']}_{config['img_size']}.sav"
+    filename = f"{config["output_path"]}/{config["architecture_name"]}/svm/{config['dataset']}_{config['img_size']}.sav"
     try:
         with open(filename, 'rb') as model_file:
             ovr_classifier = pickle.load(model_file)
@@ -186,13 +186,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
         print(f"Model file not found: {filename}")
     except Exception as e:
         print(f"An error occurred while loading the model: {e}")
-    #print(filename)
-    #pickle.dump(ovr_classifier, open(filename, 'wb'))
-    #classifier = model.get_classifier()
-    #checkpoint_file = f"{config['output_path']}/{config['dataset']}_{config['img_size']}_headonly_{architecture_name}_s{config['seed']}_best.pth"
-    #checkpoint = torch.load(checkpoint_file, map_location='cpu')
-    #classifier.load_state_dict(checkpoint)
-    #model.head = classifier
 
 
 
@@ -318,7 +311,6 @@ if __name__ == '__main__':
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
             architecture = config["architecture"]
             print(f"\t\t\t ... for {architecture}...")
             access_token = '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'
@@ -338,24 +330,8 @@ if __name__ == '__main__':
             else:
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
 
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            elif architecture == "alexnet":
-                architecture_name = "alexnet"
-            else:
-                architecture_name = "uni"
 
-            #print(filename)
-            #data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
-            #data_train = data["arr_0"].item()["train"]
-            #data_val = data["arr_0"].item()["val"]
-            #data_test = data["arr_0"].item()["val"]
+
             if architecture == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
@@ -374,19 +350,7 @@ if __name__ == '__main__':
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
-            #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
             CORRUPTIONS_DS_KEYS = {
@@ -458,6 +422,7 @@ if __name__ == '__main__':
             config["architecture"] = architecture
             corruptions = CORRUPTIONS_DS_KEYS[dataset]
 
+            #go through every corruption of the dataset          
             for corruption in corruptions:
 
                 # If the size of the images is 28 and its either bubbly, stain_deposit or characters the corruption doesnt exist,
@@ -508,10 +473,8 @@ if __name__ == '__main__':
                     y_true = test_dataset.labels
                     for severity in range(5):
                         # get probabilities of the current severity slice
-                        index_range = slice(len(y_true) * severity, y_true * (severity + 1))
-                        # calculate relative score and update evaluation metric
                         index_range = slice(len(y_true) * severity, len(y_true) * (severity + 1))
-                        # calculate relative score and update evaluation metri
+                        # calculate relative score and update evaluation metric
                         acc = get_ACC_kNN(y_true, y_pred[index_range], config['task'])
                         if dataset=="chestmnist":
                             y_pred_per = np.array(y_pred_per)
@@ -526,12 +489,10 @@ if __name__ == '__main__':
 
                         dfsupport = pd.DataFrame(data=d)
                         df = pd.concat([df, dfsupport])
-                        # If the size of the images is 28 and its either bubbly, stain_deposit or characters the corruption doesnt exist,
-                        # so skip if true
 
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/svm/corrupted/{img_size}/{dataset}_acc.csv"
 
+            filename = Path(config["output_path_acc"]) / f"{config["architecture_name"]}/svm/corrupted/{img_size}/{dataset}_acc.csv"
+            #save calculated metrics 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
+
