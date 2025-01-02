@@ -130,11 +130,13 @@ class DatasetManager:
 
             if corruption == "impulse_noise":
                 corruptor.rng = rng  # skimage..
-            ##Let corruptions out if size ==28
-
+            
 
             # By design, we have 5 intensity levels
             for severity in range(0, 5):
+                
+                #Leave corruptions out since they don´t work for every resolution
+
                 if (size == 28 and (
                         corruption == "stain_deposit" or corruption == "bubble" or corruption == "characters")):
                     break
