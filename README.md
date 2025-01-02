@@ -9,8 +9,9 @@ The submiossions have 4 columns:
 - **`prediction`**: The predicted value for one image
 - **`truth`**: The true value of one image
 - **`probability`**: The probabilis of all classes
-- 
-  The same for MedMNIST+ can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
+
+  
+The same for MedMNIST+ can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
 
 ## Code Structure for mm-PT
 The interaction between the code files in the mm-PT directory is structured to ensure modularity and clarity. While most files are interdependent, an essential separation exists between training and testing processes. During training, the focus is on producing training metrics and validation metrics for the models. Notably, no evaluation on the test set is conducted during this phase. The best model and the corresponding heads are saved for evaluation later.
@@ -37,7 +38,7 @@ The code structure is the same for mm-PT aug in comparision with mm-PT. Followin
 - **`multi_head_multi_domain_pt.py`**: Modified the logic that the model sees every dataset the same number of times
 - **`multi_head_multi_domain_pt_gradient_accumulation.py`**: Modified the logic that the model sees every dataset the same number of times
 
-Testsing is the same to mm-PT.
+Testing is the same to mm-PT.
 
 ## Code Structure for pre-trained-training
 - **`config.yaml`**: Configuration file specifying training parameters and settings.  
@@ -46,13 +47,24 @@ Testsing is the same to mm-PT.
 - **`train_linear_with_embeddings.py`**: Trains 12 heads for the 12 datasets of MedMNIST+ using a linear classifier and saves the models.
 - **`evaluate_with_embeddings_linear.py`**: Evaluates the trained models on train, validation and test, set.
 - **`evaluate_mutli_head_corrupted_*.py`**: Evaluates the trained and saved heads on the corrupted MedMNIST-C.
-Cited sources:
-
 
 The work and the code is based on the work of [Sebastian Dörrich](https://github.com/sdoerrich97/rethinking-model-prototyping-MedMNISTPlus) and [Francesco di Salvo](https://github.com/francescodisalvo05/medmnistc-api) and their respective papers: [Rethinking Model Prototyping through the MedMNIST+ Dataset Collection](https://arxiv.org/abs/2404.15786) and [MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions](https://arxiv.org/abs/2406.17536).
 
-The website and part of the Code was written in Collaboration with [Marius Bachmeier](https://github.com/mariusbachmeier/Bachelor-Thesis).
-
+Cited sources:
 Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
+Di Salvo, F., Doerrich, S., & Ledig, C. (2024). MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions. ArXiv, abs/2406.17536.
+
+##Website
+
+A deeper description for the Website can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis) from Marius Ludwig Bachmeier, who programmed the core structure of the Website. 
+Changes to the Website were made to make it possible to evaluate and compare models on the MedMNIST-C dataset from Di Salvo et al. (2024).
+
+
+
+
+Cited sources:
+Woerner, S., Jaques, A., & Baumgartner, C.F. (2024). A comprehensive and easy-to-use multi-domain multi-task medical imaging meta-dataset (MedIMeta). ArXiv, abs/2404.16000.
+Di Salvo, F., Doerrich, S., & Ledig, C. (2024). MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions. ArXiv, abs/2406.17536.
+
 
 
