@@ -2,6 +2,16 @@
 The Thesis to the Code can be found here(Link will be added when available). While the Website can be found here (Link will be added when Website is online). 
 ## make_medmnist_c.py
 Using this file, the corruptions from MedMNIST-C can be effortlessly generated and stored for every resolution, including 28x28, 64x64, 128x128, and 224x224.
+## evaluate_multi_head_corrupted_website.py
+This file shows how a .csv in the right format, that is needed for the submission at the website, can be greated. This is for submissions for the corrupted Version MedMNIST-C.
+The submiossions have 4 columns: 
+- **`dataset_name`**: Name of the dataset + the applied corruption + severity. So for bloodMNIST, corruption "pixelate" and severity 0, the dataset_name column would be: "bloodmnistpixealte0".
+- **`prediction`**: The predicted value for one image
+- **`truth`**: The true value of one image
+- **`probability`**: The probabilis of all classes
+- 
+  The same for MedMNIST+ can be found [here](https://github.com/mariusbachmeier/Bachelor-Thesis/blob/main/model-training/test.py).
+
 ## Code Structure for mm-PT
 The interaction between the code files in the mm-PT directory is structured to ensure modularity and clarity. While most files are interdependent, an essential separation exists between training and testing processes. During training, the focus is on producing training metrics and validation metrics for the models. Notably, no evaluation on the test set is conducted during this phase. The best model and the corresponding heads are saved for evaluation later.
 
