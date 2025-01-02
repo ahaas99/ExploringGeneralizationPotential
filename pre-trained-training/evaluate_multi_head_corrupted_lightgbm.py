@@ -160,13 +160,9 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     # Load the trained model
     print("\tLoad the trained model ...")
 
-
-
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
-    print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model = model
     filename = f"{config["output_path"]}/{config["architecture_name"]}/lightgbm/{config['dataset']}_{config['img_size']}.sav"
     try:
         with open(filename, 'rb') as model_file:
@@ -178,16 +174,17 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
         print(f"An error occurred while loading the model: {e}")
     
 
-
-    print(ovr_classifier)
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
         prediction = nn.Softmax(dim=1)
+    
+  
     # Move the model to the available device
     model = model.to(config['device'])
     model.requires_grad_(False)
     model.eval()
+    #Get the embeddings and evaluate the heads
     embeddings_db = []
     with torch.no_grad():
         for images, labels in tqdm(test_loader):
