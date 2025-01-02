@@ -58,7 +58,7 @@ def evaluate_with_embeddings(config: dict, support_set: dict, data_set: dict, k:
     # Extract the dataset and its metadata
     info = INFO[dataset]
     config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(info['label'])
-
+    #Set up the nearerst neigbour algorithm and save it
     nbrs = NearestNeighbors(n_neighbors=k, algorithm='ball_tree').fit(support_set['embeddings'])
     filename = f"{config["output_path"]}/{config["architecture_name"]}/knn/{config['dataset']}_{config['img_size']}.sav"
     pickle.dump(nbrs, open(filename, 'wb'))
@@ -66,6 +66,8 @@ def evaluate_with_embeddings(config: dict, support_set: dict, data_set: dict, k:
     print(f"\tRun the evaluation ...")
     y_true, y_pred = torch.tensor([]).to(config['device']), torch.tensor([]).to(config['device'])
 
+
+    #evaluate the knn
     with torch.no_grad():
         for x in range(len(data_set["embeddings"])):
 
