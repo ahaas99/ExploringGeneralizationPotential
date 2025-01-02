@@ -1,3 +1,12 @@
+"""
+xAILab
+Chair of Explainable Machine Learning
+Otto-Friedrich University of Bamberg
+
+@description:
+The script generates the corrupted MedMNIST-C dataset
+"""
+
 import argparse
 import yaml
 import torch
@@ -173,9 +182,22 @@ from utily import (calculate_passed_time, seed_worker, extract_embeddings, extra
                    extract_embeddings_densenet, knn_majority_vote, get_ACC, get_AUC, get_ACC_kNN,get_Cohen, get_Balanced_ACC, get_AUC_kNN, get_Cohen_kNN, get_Precision)
 from torch.utils.data import Dataset
 from backbones import get_backbone
-sys.path.insert(0, '/accuracies/')
-sys.path.insert(0, '/models/')
 if __name__ == '__main__':
-    ds_manager = DatasetManager(medmnist_path="/mnt/data/datasets/medmnist", output_path="/mnt/data/datasets/medmnistc/64")
-    ds_manager.create_dataset(dataset_name="all", size=64)
+    """
+    Parses command-line arguments and uses the DatasetManager to create a MedMNIST-C dataset.
+
+    Arguments:
+        --medmnist_path (str): Path to the MedMNIST dataset.
+        --medmnistc_path (str): Path where the MedMNIST-C dataset should be stored.
+        --size (int): Desired image size for the dataset.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--medmnist_path", required=True, type=str, help="Path to the medmnist dataset.")
+    parser.add_argument("--medmnistc_path", required=True, type=str, help="Path where medmnist-c should be store")
+    parser.add_argument("--size", required=True, type=int, help="Image size")
+    args = parser.parse_args()
+
+    
+    ds_manager = DatasetManager(medmnist_path=args.medmnist_path, output_path=args.medmnist_path)
+    ds_manager.create_dataset(dataset_name="all", size=args.size)
 
