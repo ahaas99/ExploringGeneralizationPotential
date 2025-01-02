@@ -161,8 +161,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
     task_string = INFO[dataset]['task']
 
     num_classes = len(INFO[dataset]['label'])
-    print(f"Initializing head for {dataset} with the task of {task_string} and thus {num_classes} Classes")
-    model = model
     filename = f"{config["output_path"]}/{config["architecture_name"]}/svm/{config['dataset']}_{config['img_size']}.sav"
     try:
         with open(filename, 'rb') as model_file:
@@ -175,8 +173,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
 
 
 
-    #model.head = classifier
-    print(ovr_classifier)
     if config['task'] == "multi-label, binary-class":
         prediction = nn.Sigmoid()
     else:
