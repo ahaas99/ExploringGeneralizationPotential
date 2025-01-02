@@ -120,7 +120,7 @@ def multi_head_multi_domain_training(config: dict, loader_dict):
     loader_len_train = {}  # holds the lengths of the dataloader for each dataset
     sum_loader_length_train = 0  # holds total length of all the dataloaders in a given split combined
     for dataset_name, train_loader in loader_dict['train_loader_dict'].items():
-        #cap the length of the dataloader to the instances of breastmnist, which has the least data
+        #cap the length of the dataloader to the instances of breastmnist, which has the least data. This makes sure every dataset get´s seen the same while training
         loader_len_train[dataset_name] = len(loader_dict['train_loader_dict']["breastmnist"])
         sum_loader_length_train += len(loader_dict['train_loader_dict']["breastmnist"])
     loader_len_val = {}  # holds the lengths of the dataloader for each dataset
