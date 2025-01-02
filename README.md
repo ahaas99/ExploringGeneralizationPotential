@@ -60,7 +60,10 @@ A deeper description for the Website can be found [here](https://github.com/mari
 Changes to the Website(front- and backend) and the database were made to make it possible to evaluate and compare models also on the MedMNIST-C dataset from Di Salvo et al. (2024).
 
 ![Homescree](images/WebsiteHomescreen.PNG)
-The homescreen displays a leaderboard excerpt for the challenge, provides a brief description of the benchmark, and includes navigation to key pages.
+The homescreen displays a leaderboard excerpt for the challenge, provides a brief description of the benchmark, and includes navigation to key pages. 
+
+
+The website offers a seamless user experience with key sections including a dynamic landing page, detailed descriptions of the datasets and challenges, an interactive leaderboard, a dedicated research hub, an engaging "About Us" page, personalized profile management, and the ability to create an account or log in with ease. As a benchmark platform, it also provides the functionality to upload submissions, allowing users to secure their spot on the leaderboard.
 
 ![Leaderboard](images/WebsiteLeaderboard.PNG)
 
