@@ -159,18 +159,6 @@ def evaluate(config: dict, dataset, test_loader: DataLoader, model):
 
     # Load the trained model
     print("\tLoad the trained model ...")
-    architecture_name = ""
-    if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-        architecture_name = "prov"
-    elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-        architecture_name = "dinov2"
-    elif architecture == "vit_base_patch16_224.dino":
-        architecture_name = "dino"
-    elif architecture == "alexnet":
-        architecture_name = "alexnet"
-    else:
-        architecture_name = "uni"
-    #print(model.state_dict())
 
 
 
@@ -309,7 +297,6 @@ if __name__ == '__main__':
             config['task'], config['in_channel'], config['num_classes'] = info['task'], info['n_channels'], len(
                 info['label'])
             DataClass = getattr(medmnist, info['python_class'])
-            # for architecture in ['hf_hub:prov-gigapath/prov-gigapath', "hf_hub:timm/vit_base_patch14_dinov2.lvd142m", "vit_base_patch16_224.dino", "hf-hub:MahmoodLab/uni"]:
             architecture = config["architecture"]
             print(f"\t\t\t ... for {architecture}...")
             access_token = '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'
@@ -329,24 +316,7 @@ if __name__ == '__main__':
             else:
                 model = timm.create_model(architecture, pretrained=True, num_classes=num_classes)
 
-            architecture_name = ""
-            if architecture == 'hf_hub:prov-gigapath/prov-gigapath':
-                architecture_name = "prov"
-            elif architecture == "hf_hub:timm/vit_base_patch14_dinov2.lvd142m":
-                architecture_name = "dinov2"
-            elif architecture == "vit_base_patch16_224.dino":
-                architecture_name = "dino"
-            elif architecture == "alexnet":
-                architecture_name = "alexnet"
-            else:
-                architecture_name = "uni"
 
-            #print(filename)
-            #data = np.load(filename, allow_pickle=True)
-            # data["arr_0"].item()["train"]["embeddings"]
-            #data_train = data["arr_0"].item()["train"]
-            #data_val = data["arr_0"].item()["val"]
-            #data_test = data["arr_0"].item()["val"]
             if architecture == 'alexnet':
                 mean, std = (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)  # Use ImageNet statistics
             else:
@@ -365,19 +335,8 @@ if __name__ == '__main__':
                     transforms.Pad((padding_left, padding_top, padding_right, padding_bottom), fill=0,
                                    padding_mode='constant')  # Pad the image to 224x224
             ])
-            #train_data = DataFromDict(data_train)
-            #val_data = DataFromDict(data_val)
-            #test_data = DataFromDict(data_test)
-            #train_dataset = DataClass(split='train', transform=data_transform, download=True, as_rgb=True,
-            #                          size=img_size)
-            #val_dataset = DataClass(split='val', transform=data_transform, download=True, as_rgb=True, size=img_size)
+      
             test_dataset = DataClass(split='test', transform=data_transform, download=True, as_rgb=True, size=img_size)
-            # Create the dataloaders
-            # print(data_train)
-            #train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=4,
-            #                          worker_init_fn=seed_worker, generator=g)
-            #val_loader = DataLoader(val_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
-            #                        , worker_init_fn=seed_worker, generator=g)
             test_loader = DataLoader(test_dataset, batch_size=config['batch_size_eval'], shuffle=False, num_workers=4
                                          , worker_init_fn=seed_worker, generator=g)
             config["dataset"] = dataset
@@ -514,8 +473,7 @@ if __name__ == '__main__':
                         # so skip if true
 
 
-            filename = Path(args.output_path_acc) / f"{architecture_name}/headonly/corrupted/{img_size}/{dataset}_acc.csv"
+            filename = Path(config["output_path_acc"]) / f"{config["architecture_name"}/headonly/corrupted/{img_size}/{dataset}_acc.csv"
 
             df.to_csv(filename, index=False)
-    # Run the training
-    #evaluate(config, train_loader, val_loader, test_loader, model)
+
