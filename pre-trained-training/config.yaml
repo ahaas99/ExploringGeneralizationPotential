@@ -18,6 +18,5 @@ medmnistc_path: '/mnt/data/new/datasets/medmnistc'
 # Modifiable Parameters
 architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
 architecture_name: 'prov' # 'prov' 'dinov2' 'dino' 'uni'
-
 k: 20  # Number of neighbors for the kNN.
 seed: 9930641  # Seed for random operations for reproducibility. (9930641, 115149041, 252139603)
