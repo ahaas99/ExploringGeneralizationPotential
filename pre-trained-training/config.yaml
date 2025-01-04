@@ -7,8 +7,8 @@
 # Fixed Parameters
 data_path: '/mnt/data/'  # Where the dataset is stored
 output_path: '/mnt/data/new/modelsalex/models'  # Where the trained model shall be stored.
-output_path_embeddings: '/mnt/data/embeddings/dinov2'  # Where the trained model shall be stored
-output_path_accuracies: '/mnt/data/accuracies/dinov2'  # Where the trained model shall be stored
+output_path_embeddings: '/mnt/data/embeddings/prov'  # Where the trained model shall be stored
+output_path_accuracies: '/mnt/data/accuracies/prov'  # Where the trained model shall be stored
 epochs: 100  # How many epochs to train for.
 learning_rate: 0.0001  # Learning rate
 batch_size: 64  # Batch size for the training.
@@ -16,10 +16,8 @@ batch_size_eval: 256  # Batch size for the evaluation.
 device: 'cuda:2'  # Which device to run the computations on.
 medmnistc_path: '/mnt/data/new/datasets/medmnistc'
 # Modifiable Parameters
-dataset: 'chestmnist'  # Which dataset to use. ('bloodmnist', 'breastmnist', 'chestmnist', 'dermamnist', 'octmnist', 'organamnist', 'organcmnist', 'organsmnist', 'pathmnist', 'pneumoniamnist', 'retinamnist', 'tissuemnist')
-img_size: 28  # Height and width of the input image. (28, 64, 128, 224)
-training_procedure: 'kNN'  # Which training procedure to use. ('endToEnd', 'linearProbing', 'kNN')
-architecture: 'hf_hub:prov-gigapath/prov-gigapath'  # Which model to use. ('hf_hub:timm/vit_base_patch14_dinov2.lvd142m', 'alexnet', 'resnet18', 'densenet121', 'efficientnet_b4', 'vit_base_patch16_224', 'vit_base_patch16_clip_224', 'eva02_base_patch16_clip_224', 'vit_base_patch16_224.dino', 'samvit_base_patch16')
-architecture_name: 'prov'
+architecture: 'hf_hub:prov-gigapath/prov-gigapath' #'hf_hub:prov-gigapath/prov-gigapath' 'hf_hub:timm/vit_base_patch14_dinov2.lvd142m' 'vit_base_patch16_224.dino', 'hf_hub:MahmoodLab/UNI'
+architecture_name: 'prov' # 'prov' 'dinov2' 'dino' 'uni'
+
 k: 20  # Number of neighbors for the kNN.
 seed: 9930641  # Seed for random operations for reproducibility. (9930641, 115149041, 252139603)
