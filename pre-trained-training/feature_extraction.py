@@ -63,7 +63,7 @@ def extract_embeddings(model, device, dataloader, alexnet=False):
     return data
 
 
-def main(data_path:str, output_path: str, batch_size: int = 256, device: str = 'cuda:0'):
+def main(architecture:str, data_path:str, output_path: str, batch_size: int = 256, device: str = 'cuda:0'):
     """
     Extracts the embeddings from the models.
 
@@ -100,7 +100,7 @@ def main(data_path:str, output_path: str, batch_size: int = 256, device: str = '
 
             padding_left, padding_top = total_padding // 2, total_padding // 2
             padding_right, padding_bottom = total_padding - padding_left, total_padding - padding_top
-            for architecture in ['hf-hub:MahmoodLab/uni']:
+            for architecture in architecture:
                 print(f"\t\t\t ... for {architecture}...")
                 access_token = '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'
                 # Create the model
@@ -182,10 +182,34 @@ def main(data_path:str, output_path: str, batch_size: int = 256, device: str = '
 if __name__ == '__main__':
     # Read out the command line parameters.
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config_file", required=True, type=str, help="Path to the configuration file to use.")
     parser.add_argument("--data_path", required=False, type=str, default="", help="Path to the MedMNIST+ dataset.")
     parser.add_argument("--output_path_embeddings", required=False, type=str, help="Path to the output folder.")
+    parser.add_argument("--architecture", required=False, type=str, help="Which architecture to use.")
     parser.add_argument("--batch_size", required=False, type=int, default=256, help="Which dataset to use.")
     parser.add_argument("--device", required=False, type=str, default='cuda:0', help="Which image size to use.")
 
+    with open(config_file, 'r') as f:
+        config = yaml.safe_load(f)
+
+    # Adapt to the command line arguments
+    if args.data_path:
+        config['data_path'] = args.data_path
+
+    if args.output_path_embeddings:
+        config['output_path_embeddings'] = args.output_path_embeddings
+
+    if args.architecture:
+        config['architecture'] = args.architecture
+
+    if args.batch_size:
+        config['batch_size'] = args.batch_size
+
+    if args.device:
+        config['device'] = args.device
+     
+    if args.output_path_acc:
+        config['output_path_acc'] = args.output_path_acc
+
     args = parser.parse_args()
-    main(data_path=args.data_path, output_path=args.output_path_embeddings, batch_size=args.batch_size, device=args.device)
+    main(architecture=config["architecture"], data_path=config["data_path"], output_path=config["output_path_embeddings"], batch_size=config["batch_size"], device=config["device"])
