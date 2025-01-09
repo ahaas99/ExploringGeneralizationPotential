@@ -72,7 +72,7 @@ def evaluate(config: dict, dataset,test_loader: DataLoader):
     Evaluate a model on the specified dataset.
 
     :param config: Dictionary containing the parameters and hyperparameters.
-    :param train_loader: DataLoader for the training set.
+    :param dataset: Dataset which is evaluated
     :param test_loader: DataLoader for the test set.
     """
 
